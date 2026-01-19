@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="PreReleaseDelistCli/PreReleaseDelistCli.csproj" />
+  <Project Path="PreReleaseDelistLib/PreReleaseDelistLib.csproj" />
+</Solution>
