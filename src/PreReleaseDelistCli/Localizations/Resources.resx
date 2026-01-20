@@ -19,9 +19,9 @@
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
     <data name="Exceptions.Configuration.NugetApiUrl" xml:space="preserve">
-        <value>The required Nuget Server API URL was not provided.</value>
+        <value>The required Nuget Server API URL was not provided. If this was stored in your Environment Variables ensure the correct PREFIX and Key Name was used, otherwise ensure appsettings.json is present.</value>
     </data>
     <data name="Exceptions.Configuration.NugetApiKey" xml:space="preserve">
-        <value>The required Nuget API Key was not provided.</value>
+        <value>The required Nuget API Key was not configured or could not be provided. If you have stored this in your Environment Variables ensure the correct PREFIX and Name is used.</value>
     </data>
 </root>

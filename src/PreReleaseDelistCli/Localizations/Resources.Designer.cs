@@ -60,7 +60,7 @@ namespace PreReleaseDelistCli.Localizations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The required Nuget API Key was not provided..
+        ///   Looks up a localized string similar to The required Nuget API Key was not configured or could not be provided. If you have stored this in your Environment Variables ensure the correct PREFIX and Name is used..
         /// </summary>
         internal static string Exceptions_Configuration_NugetApiKey {
             get {
@@ -69,7 +69,7 @@ namespace PreReleaseDelistCli.Localizations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The required Nuget Server API URL was not provided..
+        ///   Looks up a localized string similar to The required Nuget Server API URL was not provided. If this was stored in your Environment Variables ensure the correct PREFIX and Key Name was used, otherwise ensure appsettings.json is present..
         /// </summary>
         internal static string Exceptions_Configuration_NugetApiUrl {
             get {
