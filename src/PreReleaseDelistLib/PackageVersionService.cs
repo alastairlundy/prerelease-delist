@@ -1,4 +1,5 @@
-﻿using NuGet.Common;
+﻿using EnhancedLinq.Deferred;
+using NuGet.Common;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 
@@ -17,10 +18,18 @@ public class PackageVersionService : IPackageVersionService
 
     private readonly SourceCacheContext _cacheContext;
     
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="nugetApiUrl"></param>
+    /// <param name="nugetApiKey"></param>
+    /// <param name="packageId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public async Task<NuGetVersion[]> GetPrereleasePackageVersionsAsync(string nugetApiUrl, string nugetApiKey, string packageId,
         CancellationToken cancellationToken)
     {
-        var repoInfo = GetRepoInfo(nugetApiUrl);
+        SourceRepository repoInfo = GetRepoInfo(nugetApiUrl);
         
         FindPackageByIdResource resource = await repoInfo.GetResourceAsync<FindPackageByIdResource>(cancellationToken);
 
@@ -35,18 +44,70 @@ public class PackageVersionService : IPackageVersionService
             .ToArray();
     }
 
-    public async Task<NuGetVersion[]> GetAllPackageVersionsAsync(string nugetApiUrl, string nugetApiKey, string packageId,
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="nugetApiUrl"></param>
+    /// <param name="nugetApiKey"></param>
+    /// <param name="packageId"></param>
+    /// <param name="excludeUnlistedVersions"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public async Task<NuGetVersion[]> GetAllPackageVersionsAsync(string nugetApiUrl, string nugetApiKey, string packageId, bool excludeUnlistedVersions,
         CancellationToken cancellationToken)
     {
-        var repoInfo = GetRepoInfo(nugetApiUrl);
+        SourceRepository repoInfo = GetRepoInfo(nugetApiUrl);
         
         FindPackageByIdResource resource = await repoInfo.GetResourceAsync<FindPackageByIdResource>(cancellationToken);
-
+        
         IEnumerable<NuGetVersion>? allPackageVersions =
             await resource.GetAllVersionsAsync(packageId, _cacheContext, NullLogger.Instance,
                 cancellationToken);
+        
+        if (allPackageVersions is null)
+            return [];
+        
+        NuGetVersion[] allPackageVersionsArray = allPackageVersions.ToArray();
 
-        return allPackageVersions is null ? [] : allPackageVersions.ToArray();
+        if (!excludeUnlistedVersions)
+            return allPackageVersionsArray;
+        
+        IEnumerable<NuGetVersion> delistedVersions = await GetDelistedPackageVersionsAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken);
+        return allPackageVersionsArray.Exclude(delistedVersions).ToArray();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="nugetApiUrl"></param>
+    /// <param name="nugetApiKey"></param>
+    /// <param name="packageId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public async Task<NuGetVersion[]> GetDelistedPackageVersionsAsync(string nugetApiUrl, string nugetApiKey, string packageId,
+        CancellationToken cancellationToken)
+    {
+        SourceRepository repoInfo = GetRepoInfo(nugetApiUrl);
+        
+        PackageSearchResource searchResource =
+            await repoInfo.GetResourceAsync<PackageSearchResource>(cancellationToken);
+
+        SearchFilter searchFilter = new(true, SearchFilterType.IsAbsoluteLatestVersion);
+
+        IEnumerable<IPackageSearchMetadata> packages = await searchResource.SearchAsync($"{packageId}", searchFilter, 0, 10000,
+            NullLogger.Instance, cancellationToken);
+
+        IPackageSearchMetadata? package = packages.FirstOrDefault(p => p.IsListed && p.Identity.Id == packageId);
+
+        if (package is null)
+            return [];
+
+        IEnumerable<VersionInfo> actualVersions = await package.GetVersionsAsync();
+        
+        return actualVersions
+            .Where(vInfo => !vInfo.PackageSearchMetadata.IsListed)
+            .Select(v => v.Version)
+            .ToArray();
     }
 
     private SourceRepository GetRepoInfo(string nugetApiUrl) => Repository.Factory.GetCoreV3(nugetApiUrl);

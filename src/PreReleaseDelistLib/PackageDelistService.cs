@@ -32,7 +32,7 @@ public class PackageDelistService : IPackageDelistService
         string nugetApiUrl, string nugetApiKey, string packageId, CancellationToken cancellationToken)
     {
         NuGetVersion[] versionToDelist = await _packageVersionService.GetAllPackageVersionsAsync
-            (nugetApiUrl, nugetApiKey, packageId, cancellationToken);
+            (nugetApiUrl, nugetApiKey, packageId, true, cancellationToken);
         
         IAsyncEnumerable<(NuGetVersion version, bool delistSuccess, string responseMessage)> delistResults = 
             RequestPackageDelistAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken,  versionToDelist);
@@ -62,10 +62,16 @@ public class PackageDelistService : IPackageDelistService
         if(!doesPackageExists)
             throw new ArgumentException($"Package '{packageId}' does not exist on Nuget Server '{nugetApiUrl}'.");
         
-        (NuGetVersion version, bool isListed)[] versionListResults = await CheckIfPackageIsListed(nugetApiUrl, packageId, versions, cancellationToken);
+        (NuGetVersion version, bool isListed)[] versionListResults = await CheckIfPackageIsListed(nugetApiUrl, nugetApiKey, packageId, versions, cancellationToken);
         
-        NuGetVersion[] versionsToDelist = versionListResults.Select(x => x.version)
+        NuGetVersion[] versionsToDelist = versionListResults.Where(v => !v.isListed)
+            .Select(x => x.version)
             .ToArray();
+
+        foreach ((NuGetVersion version, bool isListed) alreadyDelistedVersion in versionListResults.Where(v => !v.isListed))
+        {
+            yield return (alreadyDelistedVersion.version, false, "Package already de-listed.");
+        }
 
         if (versionsToDelist.Length == 0)
             yield break;
@@ -100,46 +106,17 @@ public class PackageDelistService : IPackageDelistService
         }
     }
 
-    private async Task<(NuGetVersion version, bool isListed)[]> CheckIfPackageIsListed(string nugetApiUrl, string packageId,
+    private async Task<(NuGetVersion version, bool isListed)[]> CheckIfPackageIsListed(string nugetApiUrl, string nugetApiKey, string packageId,
         NuGetVersion[] versions, CancellationToken cancellationToken)
     {
-        var feedInfo = InitFeedInfo(nugetApiUrl);
+        List<(NuGetVersion versions, bool isListed)> output = new(capacity: versions.Length);
         
-        PackageSearchResource searchResource =
-            await feedInfo.repository.GetResourceAsync<PackageSearchResource>(cancellationToken);
-
-        SearchFilter searchFilter = new(true, SearchFilterType.IsAbsoluteLatestVersion)
-        {
-            PackageTypes = ["Dependency", "DotnetCliTool"]
-        };
-
-        IEnumerable<IPackageSearchMetadata> packages = await searchResource.SearchAsync("", searchFilter, 0, 10000,
-            NullLogger.Instance, cancellationToken);
-
-        IPackageSearchMetadata? package = packages.FirstOrDefault(p => p.IsListed && p.Identity.Id == packageId);
-
-        if (package is null)
-            return [];
+        NuGetVersion[] alreadyDelistedVersions = await _packageVersionService.GetDelistedPackageVersionsAsync(nugetApiUrl, nugetApiKey,
+            packageId, cancellationToken);
         
-        IEnumerable<VersionInfo> actualVersions =  await package.GetVersionsAsync();
-
-        List<(NuGetVersion version, bool isListed)> output = new();
-
-        VersionInfo[] packageVersions = actualVersions.ToArray();
+        output.AddRange(alreadyDelistedVersions.Select(v => new ValueTuple<NuGetVersion, bool>(v, false)));
         
-        foreach (VersionInfo packageVersion in packageVersions)
-        {
-            NuGetVersion? version = versions.FirstOrDefault(v => v == packageVersion.Version);
-            
-            if (version is not null)
-            {
-                output.Add((version, packageVersion.PackageSearchMetadata.IsListed));
-            }
-        }
-
-        NuGetVersion[] totalVersions = packageVersions.Select(v => v.Version).ToArray();
-
-        IEnumerable<NuGetVersion> remainingVersions = totalVersions.Exclude(versions);
+        IEnumerable<NuGetVersion> remainingVersions = versions.Exclude(alreadyDelistedVersions);
         
         foreach (NuGetVersion version in remainingVersions)
         {
