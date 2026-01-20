@@ -9,7 +9,7 @@ namespace PreReleaseDelistCli;
 public class DelistCommand
 {
     [Command("")]
-    async Task<int> RunAsync(
+    public async Task<int> RunAsync(
         [FromServices] IConfiguration configuration,
         [FromServices] IPackageDelistService packageDelistService,
         [FromServices] IPackageVersionService packageVersionService,
