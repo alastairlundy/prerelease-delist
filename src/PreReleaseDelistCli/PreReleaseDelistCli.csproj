@@ -6,6 +6,9 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PublishAot>true</PublishAot>
+        <IsAoTCompatible>true</IsAoTCompatible>
+        <IsTrimmable>true</IsTrimmable>
+        <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
         <InvariantGlobalization>true</InvariantGlobalization>
         <AssemblyName>prerelease-delist</AssemblyName>
     </PropertyGroup>
