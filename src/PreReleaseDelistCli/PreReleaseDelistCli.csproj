@@ -20,11 +20,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Localizations\" />
+      <ProjectReference Include="..\PreReleaseDelistLib\PreReleaseDelistLib.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\PreReleaseDelistLib\PreReleaseDelistLib.csproj" />
       <EmbeddedResource Update="Localizations\Resources.resx">
         <Generator>ResXFileCodeGenerator</Generator>
         <LastGenOutput>Resources.Designer.cs</LastGenOutput>
