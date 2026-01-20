@@ -5,14 +5,12 @@ using PreReleaseDelistLib;
 
 namespace PreReleaseDelistCli;
 
-
 public class DelistCommand
 {
     [Command("")]
     public async Task<int> RunAsync(
         [FromServices] IConfiguration configuration,
         [FromServices] IPackageDelistService packageDelistService,
-        [FromServices] IPackageVersionService packageVersionService,
         string packageId,
         CancellationToken cancellationToken,
         bool delistAllVersions = false,
@@ -21,8 +19,10 @@ public class DelistCommand
     {
         ArgumentException.ThrowIfNullOrEmpty(packageId);
 
-        string nugetApiUrl = configuration["NuGetApiUrl"] ?? throw new ArgumentNullException(Resources.Exceptions_Configuration_NugetApiUrl);
-        string nugetApiKey = configuration["NuGetApiKey"] ?? throw new ArgumentNullException(Resources.Exceptions_Configuration_NugetApiKey);
+        string nugetApiUrl = configuration["NuGetServer:ApiBaseUrl"] ?? throw new 
+            ArgumentNullException(Resources.Exceptions_Configuration_NugetApiUrl);
+        string nugetApiKey = configuration["NuGetServer:ApiKey"] ?? throw new 
+            ArgumentNullException(Resources.Exceptions_Configuration_NugetApiKey);
         
         ArgumentException.ThrowIfNullOrEmpty(nugetApiUrl);
         ArgumentException.ThrowIfNullOrEmpty(nugetApiKey);
@@ -42,12 +42,36 @@ public class DelistCommand
                 .ToArrayAsync(cancellationToken);    
         }
 
-        foreach ((NuGetVersion version, bool isDelisted, string responseMessage) result in results)
+        await Console.Out.WriteLineAsync($"Versions Delisted for Package: {packageId}");
+
+        IEnumerable<(NuGetVersion version, bool isDelisted, string responseMessage)> delistedVersions = results
+            .Where(x => x.isDelisted);
+
+        int delistedVersionsCount = 0;
+        foreach ((NuGetVersion version, bool isDelisted, string responseMessage) result in delistedVersions)
         {
-            result.version.
+            await Console.Out.WriteLineAsync($"{result.version.ToFullString()}");
+            delistedVersionsCount++;
         }
 
-        return 0;
+        await Console.Out.WriteLineAsync();
+
+        int exitCode = 0;
+        
+        if (delistedVersionsCount < results.Length)
+        {
+            await Console.Out.WriteLineAsync($"The following versions of {packageId} could not be delisted:");
+
+            foreach ((NuGetVersion version, bool isDelisted, string responseMessage) result in 
+                     results.Where(x => !x.isDelisted))
+            {
+                await Console.Out.WriteLineAsync($"{result.version.ToFullString()} - With Reason: {result.responseMessage}");
+            }
+
+            exitCode = 1;
+        }
+        
+        return exitCode;
     }
     
     private NuGetVersion[] ParseVersions(string[] versions, bool throwOnError)
