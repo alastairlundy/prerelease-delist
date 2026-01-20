@@ -71,6 +71,4 @@ public class DelistCommand
         
         return output.ToArray();
     }
-    
-    
 }
