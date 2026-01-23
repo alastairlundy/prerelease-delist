@@ -39,14 +39,14 @@ public class AuthCommand
         {
             if (OperatingSystem.IsWindows())
             {
-                Environment.SetEnvironmentVariable("PreReleaseDelistCLI_NuGetServer:ApiKey", apiKey, EnvironmentVariableTarget.User);
+                Environment.SetEnvironmentVariable("PreReleaseDelistCLI_NuGetApiKey", apiKey, EnvironmentVariableTarget.User);
                 success = true;
             }
             else
             {
                 using ProcessConfiguration shellConfig = processConfigurationFactory
                     .Create(shellInfo.TargetFilePath.FullName, 
-                        $"export PreReleaseDelistCLI_NuGetServer:ApiKey='{apiKey}'");
+                        $"export PreReleaseDelistCLI_NuGetApiKey='{apiKey}'");
 
                 ProcessResult result = await processInvoker.ExecuteAsync(shellConfig,
                     cancellationToken: cancellationToken);
@@ -59,14 +59,14 @@ public class AuthCommand
         {
             if (OperatingSystem.IsWindows())
             {
-                Environment.SetEnvironmentVariable("PreReleaseDelistCLI_ApiBaseUrl", apiKey, EnvironmentVariableTarget.User);
+                Environment.SetEnvironmentVariable("PreReleaseDelistCLI_NugetServerUrl", apiKey, EnvironmentVariableTarget.User);
                 success = true;
             }
             else
             {
                 using ProcessConfiguration shellConfig = processConfigurationFactory
                     .Create(shellInfo.TargetFilePath.FullName, 
-                        $"export PreReleaseDelistCLI_NuGetServer:ApiBaseUrl='{serverUrl}'");
+                        $"export PreReleaseDelistCLI_NuGetServerUrl='{serverUrl}'");
 
                 ProcessResult result = await processInvoker.ExecuteAsync(shellConfig,
                     cancellationToken: cancellationToken);
@@ -87,9 +87,9 @@ public class AuthCommand
 
         if (OperatingSystem.IsWindows())
         {
-            Environment.SetEnvironmentVariable("PreReleaseDelistCLI_NuGetServer:ApiKey", "", EnvironmentVariableTarget.User);
+            Environment.SetEnvironmentVariable("PreReleaseDelistCLI_NuGetApiKey", "", EnvironmentVariableTarget.User);
         
-            Environment.SetEnvironmentVariable("PreReleaseDelistCLI_NuGetServer:ApiBaseUrl", "", EnvironmentVariableTarget.User);
+            Environment.SetEnvironmentVariable("PreReleaseDelistCLI_NuGetServerUrl", "", EnvironmentVariableTarget.User);
             success = true;
         }
         else
@@ -98,7 +98,7 @@ public class AuthCommand
 
             using ProcessConfiguration shellConfig = processConfigurationFactory
                 .Create(shellInformation.TargetFilePath.FullName,
-                    "unset PreReleaseDelistCLI_NuGetServer:ApiKey PreReleaseDelistCLI_NuGetServer:ApiBaseUrl");
+                    "unset PreReleaseDelistCLI_NuGetApiKey PreReleaseDelistCLI_NuGetServerUrl");
             
             ProcessResult result = await processInvoker.ExecuteAsync(shellConfig,
                 cancellationToken: cancellationToken);

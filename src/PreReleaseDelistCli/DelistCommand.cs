@@ -36,9 +36,9 @@ public class DelistCommand
     {
         ArgumentException.ThrowIfNullOrEmpty(packageId);
 
-        string nugetApiUrl = configuration["NuGetServer:ApiBaseUrl"] ?? throw new 
+        string nugetApiUrl = configuration["NuGetServerUrl"] ?? throw new 
             ArgumentNullException(Resources.Exceptions_Configuration_NugetApiUrl);
-        string nugetApiKey = configuration["NuGetServer:ApiKey"] ?? throw new 
+        string nugetApiKey = configuration["NuGetApiKey"] ?? throw new 
             ArgumentNullException(Resources.Exceptions_Configuration_NugetApiKey);
         
         ArgumentException.ThrowIfNullOrEmpty(nugetApiUrl);
