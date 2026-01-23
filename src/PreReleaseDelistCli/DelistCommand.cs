@@ -49,7 +49,7 @@ public class DelistCommand
     [DefaultValue(true)]
     public bool UseStrictParsing  { get; set; }
     
-    [CliArgument(Order = 0, Name = "versions")]
+    [CliArgument(Name = "versions")]
     public string[] Versions { get; set; }
     
     [CliOption(Name = "--api-key")]
