@@ -22,12 +22,15 @@ dotnet build -c Release
 ## Usage
 
 ### Authentication
-
 You can set your NuGet API Key and Server URL using the `auth` command:
 
 ```bash
 prerelease-delist auth init --api-key "YOUR_API_KEY" --server-url "https://api.nuget.org/v3/index.json"
 ```
+
+The Auth command saves the API Key and Server Url to Environment Variables. 
+
+**Security Info**: If you share a device with other people or other people have remote access to your device then do not use the CLI's auth commands. 
 
 To clear the stored authentication:
 
