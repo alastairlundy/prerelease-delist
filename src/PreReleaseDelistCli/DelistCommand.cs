@@ -38,25 +38,25 @@ public class DelistCommand
     }
     
     [CliArgument(Name = "--package-id", Required = true,
-        Arity = CliArgumentArity.ExactlyOne, Order = 0)]
+        Arity = CliArgumentArity.ExactlyOne)]
     public string PackageId { get; set; }
     
-    [CliOption(Name = "--delist-all-versions", Aliases = ["dav"])]
+    [CliOption(Name = "--delist-all-versions")]
     [DefaultValue(false)]
     public bool DelistAllVersions { get; set; }
     
-    [CliOption(Name = "--use-strict-parsing", Aliases = ["usp"])]
+    [CliOption(Name = "--use-strict-parsing")]
     [DefaultValue(true)]
     public bool UseStrictParsing  { get; set; }
     
     [CliArgument(Order = 0, Name = "<versions>")]
     public string[] Versions { get; set; }
     
-    [CliOption(Name = "--api-key", Aliases = ["ak"])]
+    [CliOption(Name = "--api-key")]
     [DefaultValue(null)]
     public string? ApiKey { get; set; }
     
-    [CliOption(Name = "--server-url", Aliases = ["url"])]
+    [CliOption(Name = "--server-url")]
     [DefaultValue(null)]
     public string? ServerUrl { get; set; }
     
