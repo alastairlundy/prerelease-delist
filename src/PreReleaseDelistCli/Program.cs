@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using PreReleaseDelistCli;
-using PreReleaseDelistLib;
 
 ConsoleApp.ConsoleAppBuilder app = ConsoleApp
     .Create()

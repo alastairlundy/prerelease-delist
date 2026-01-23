@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using NuGet.Versioning;
-using PreReleaseDelistCli.Localizations;
-using PreReleaseDelistLib;
 
 namespace PreReleaseDelistCli;
 
