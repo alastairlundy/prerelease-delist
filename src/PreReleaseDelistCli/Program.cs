@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using CliInvoke.Extensions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 ConsoleApp.ConsoleAppBuilder app = ConsoleApp
@@ -6,6 +7,7 @@ ConsoleApp.ConsoleAppBuilder app = ConsoleApp
     .ConfigureServices(services =>
     {
         services.AddHttpClient();
+        services.AddCliInvoke();
         services.AddSingleton<IPackageVersionService, PackageVersionService>();
         services.AddSingleton<IPackageDelistService, PackageDelistService>();
 
@@ -32,5 +34,7 @@ ConsoleApp.ConsoleAppBuilder app = ConsoleApp
     });
 
 app.Add<DelistCommand>();
+
+app.Add<AuthCommand>("auth");
 
 await app.RunAsync(args);
