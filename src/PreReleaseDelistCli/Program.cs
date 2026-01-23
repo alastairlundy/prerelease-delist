@@ -17,7 +17,6 @@
  */
 
 using CliInvoke.Extensions;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 ConsoleApp.ConsoleAppBuilder app = ConsoleApp
