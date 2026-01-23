@@ -165,7 +165,10 @@ public class PackageDelistService : IPackageDelistService
         PackageSearchResource searchResource =
             await feedInfo.repository.GetResourceAsync<PackageSearchResource>(cancellationToken);
 
-        SearchFilter searchFilter = new(true, SearchFilterType.IsAbsoluteLatestVersion);
+        SearchFilter searchFilter = new(true, SearchFilterType.IsAbsoluteLatestVersion)
+        {
+            PackageTypes = ["Dependency"]
+        };
 
         IEnumerable<IPackageSearchMetadata>? packages = await searchResource.SearchAsync(packageId, searchFilter, 0,
             1000, NullLogger.Instance, cancellationToken);
