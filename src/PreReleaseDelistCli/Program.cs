@@ -50,4 +50,9 @@ Cli.Ext.ConfigureServices(services =>
     services.AddSingleton(configuration);
 });
 
-await Cli.RunAsync<DelistCommand>(args);
+await Cli.RunAsync<DelistCommand>(args, new CliSettings
+{
+    EnableDefaultExceptionHandler = true,
+    EnableSuggestDirective = true,
+    EnableEnvironmentVariablesDirective = true,
+});
