@@ -36,13 +36,15 @@ ConsoleApp.ConsoleAppBuilder app = ConsoleApp
             configurationBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json")
-                .AddEnvironmentVariables("PreReleaseDelistCLI_");
+                .AddEnvironmentVariables("PreReleaseDelistCLI_")
+                .AddCommandLine(args);
         }
         catch
         {
             configurationBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddEnvironmentVariables("PreReleaseDelistCLI_");
+                .AddEnvironmentVariables("PreReleaseDelistCLI_")
+                .AddCommandLine(args);
         }
         
         IConfiguration configuration = configurationBuilder.Build();
