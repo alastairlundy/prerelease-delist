@@ -19,41 +19,35 @@
 using CliInvoke.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
-ConsoleApp.ConsoleAppBuilder app = ConsoleApp
-    .Create()
-    .ConfigureServices(services =>
+Cli.Ext.ConfigureServices(services =>
+{
+    services.AddHttpClient()
+        .AddCliInvoke()
+        .AddSingleton<IPackageVersionService, PackageVersionService>()
+        .AddSingleton<IPackageDelistService, PackageDelistService>();
+
+    IConfigurationBuilder configurationBuilder;
+
+    // Fallback to avoid using AppSettings.Json if it is not present.
+    try
     {
-        services.AddHttpClient();
-        services.AddCliInvoke();
-        services.AddSingleton<IPackageVersionService, PackageVersionService>();
-        services.AddSingleton<IPackageDelistService, PackageDelistService>();
-
-        IConfigurationBuilder configurationBuilder;
-
-        // Fallback to avoid using AppSettings.Json if it is not present.
-        try
-        {
-            configurationBuilder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .AddEnvironmentVariables("PreReleaseDelistCLI_")
-                .AddCommandLine(args);
-        }
-        catch
-        {
-            configurationBuilder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddEnvironmentVariables("PreReleaseDelistCLI_")
-                .AddCommandLine(args);
-        }
+        configurationBuilder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .AddEnvironmentVariables("PreReleaseDelistCLI_")
+            .AddCommandLine(args);
+    }
+    catch
+    {
+        configurationBuilder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddEnvironmentVariables("PreReleaseDelistCLI_")
+            .AddCommandLine(args);
+    }
         
-        IConfiguration configuration = configurationBuilder.Build();
+    IConfiguration configuration = configurationBuilder.Build();
         
-        services.AddSingleton(configuration);
-    });
+    services.AddSingleton(configuration);
+});
 
-app.Add<DelistCommand>();
-
-app.Add<AuthCommand>("auth");
-
-await app.RunAsync(args);
+await Cli.RunAsync<DelistCommand>(args);

@@ -17,49 +17,102 @@
  */
 
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using EnhancedLinq.Immediate;
 using NuGet.Versioning;
 
 namespace PreReleaseDelistCli;
 
+[CliCommand(Name = "")]
 public class DelistCommand
 {
-    [Command("")]
-    public async Task<int> RunAsync(
-        [FromServices] IConfiguration configuration,
-        [FromServices] IPackageDelistService packageDelistService,
-        string packageId,
-        CancellationToken cancellationToken,
-        bool delistAllVersions = false,
-        bool useStrictParsing = true,
-        [Argument] params string[] versions)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(packageId);
+    private readonly IConfiguration _configuration;
+    private readonly IPackageDelistService _packageDelistService;
 
-        string nugetApiUrl = configuration["NuGetServerUrl"] ?? throw new 
-            ArgumentNullException(Resources.Exceptions_Configuration_NugetApiUrl);
-        string nugetApiKey = configuration["NuGetApiKey"] ?? throw new 
-            ArgumentNullException(Resources.Exceptions_Configuration_NugetApiKey);
+    public DelistCommand(IConfiguration configuration,
+        IPackageDelistService packageDelistService)
+    {
+        _configuration = configuration;
+        _packageDelistService = packageDelistService;
+    }
+    
+    [CliArgument(Name = "--package-id", Required = true,
+        Arity = CliArgumentArity.ExactlyOne, Order = 0)]
+    public string PackageId { get; set; }
+    
+    [CliOption(Name = "--delist-all-versions", Aliases = ["dav"])]
+    [DefaultValue(false)]
+    public bool DelistAllVersions { get; set; }
+    
+    [CliOption(Name = "--use-strict-parsing", Aliases = ["usp"])]
+    [DefaultValue(true)]
+    public bool UseStrictParsing  { get; set; }
+    
+    [CliArgument(Order = 0, Name = "<versions>")]
+    public string[] Versions { get; set; }
+    
+    [CliOption(Name = "--api-key", Aliases = ["ak"])]
+    [DefaultValue(null)]
+    public string? ApiKey { get; set; }
+    
+    [CliOption(Name = "--server-url", Aliases = ["url"])]
+    [DefaultValue(null)]
+    public string? ServerUrl { get; set; }
+    
+    public async Task<int> RunAsync(
+        CancellationToken cancellationToken)
+    {
+        if (Versions is null || Versions.Length == 0)
+        {
+            await Console.Error.WriteLineAsync("Error: No versions were specified. Provide at least one version or use --delist-all-versions.");
+            return -1;
+        }
+
+        // Keep only strings that begin with a digit (typical semantic versions) and are non-empty
+        Versions = Versions.Exclude(Versions, s => string.IsNullOrEmpty(s) || char.IsDigit(s.First()));
+
+        if (Versions.Length == 0)
+        {
+            await Console.Error.WriteLineAsync("Error: No valid version strings provided after filtering.");
+            return -1;
+        }
+
+        ArgumentException.ThrowIfNullOrEmpty(PackageId);
         
-        ArgumentException.ThrowIfNullOrEmpty(nugetApiUrl);
-        ArgumentException.ThrowIfNullOrEmpty(nugetApiKey);
+        string? nugetServerUrl = !string.IsNullOrEmpty(ServerUrl) ? ServerUrl : _configuration["NuGetServerUrl"];
+        string? nugetApiKey = !string.IsNullOrEmpty(ApiKey) ? ApiKey : _configuration["NuGetApiKey"];
+
+        if (string.IsNullOrEmpty(nugetServerUrl))
+        {
+            Console.WriteLine($"Error: {Resources.Exceptions_Configuration_NugetApiUrl}");
+            return -1;
+        }
+
+        if (string.IsNullOrEmpty(nugetApiKey))
+        {
+            Console.WriteLine($"Error: {Resources.Exceptions_Configuration_NugetApiKey}");
+            return -1;
+        }
 
         (NuGetVersion version, bool isDelisted, string responseMessage)[] results; 
         
-        if (delistAllVersions)
+        if (DelistAllVersions)
         {
-            results = await packageDelistService.RequestPackageDelistAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken);
+            results = await _packageDelistService.RequestPackageDelistAsync(nugetServerUrl, nugetApiKey,
+                PackageId, cancellationToken);
         }
         else
         {
-            NuGetVersion[] parsedVersions = ParseVersions(versions, useStrictParsing);
+            NuGetVersion[] parsedVersions = ParseVersions(Versions, UseStrictParsing);
             
-            results = await packageDelistService.RequestPackageDelistAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken,
+            results = await _packageDelistService.RequestPackageDelistAsync(nugetServerUrl, nugetApiKey,
+                    PackageId, cancellationToken,
                     parsedVersions)
                 .ToArrayAsync(cancellationToken);    
         }
 
-        await Console.Out.WriteLineAsync($"Versions Delisted for Package: {packageId}");
+        await Console.Out.WriteLineAsync($"Versions Delisted for Package: {PackageId}");
 
         IEnumerable<(NuGetVersion version, bool isDelisted, string responseMessage)> delistedVersions = results
             .Where(x => x.isDelisted);
@@ -77,7 +130,7 @@ public class DelistCommand
         
         if (delistedVersionsCount < results.Length)
         {
-            await Console.Out.WriteLineAsync($"The following versions of {packageId} could not be delisted:");
+            await Console.Out.WriteLineAsync($"The following versions of {PackageId} could not be delisted:");
 
             foreach ((NuGetVersion version, bool isDelisted, string responseMessage) result in 
                      results.Where(x => !x.isDelisted))

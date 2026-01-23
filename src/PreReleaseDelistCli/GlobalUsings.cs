@@ -4,7 +4,7 @@ global using System;
 global using System.IO;
 global using System.Threading;
 global using System.Threading.Tasks;
-global using ConsoleAppFramework;
+global using DotMake.CommandLine;
 global using Microsoft.Extensions.Configuration;
 global using PreReleaseDelistCli;
 global using PreReleaseDelistCli.Localizations;
