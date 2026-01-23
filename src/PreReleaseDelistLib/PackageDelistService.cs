@@ -1,4 +1,3 @@
-﻿using System.Net;
 ﻿/*
     PreReleaseDelistLib
     Copyright (C) 2026 Alastair Lundy
@@ -17,11 +16,9 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Net;
 using System.Runtime.CompilerServices;
 using EnhancedLinq.Deferred;
-using NuGet.Common;
-using NuGet.Protocol;
-using NuGet.Protocol.Core.Types;
 
 namespace PreReleaseDelistLib;
 

@@ -1,7 +1,3 @@
-﻿using EnhancedLinq.Deferred;
-using NuGet.Common;
-using NuGet.Protocol;
-using NuGet.Protocol.Core.Types;
 ﻿/*
     PreReleaseDelistLib
     Copyright (C) 2026 Alastair Lundy
@@ -20,6 +16,7 @@ using NuGet.Protocol.Core.Types;
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using EnhancedLinq.Deferred;
 
 namespace PreReleaseDelistLib;
 
@@ -109,6 +106,7 @@ public class PackageVersionService : IPackageVersionService
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
     /// <returns>An array of delisted NuGet version strings matching the specified criteria.</returns>
     public async Task<NuGetVersion[]> GetDelistedPackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
+        string packageId,
         CancellationToken cancellationToken)
     {
         SourceRepository repoInfo = GetRepoInfo(nugetApiUrl);
