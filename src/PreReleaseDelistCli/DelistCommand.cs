@@ -63,13 +63,12 @@ public class DelistCommand
     public async Task<int> RunAsync(
         CancellationToken cancellationToken)
     {
-        if (Versions is null || Versions.Length == 0)
+        if (Versions.Length == 0)
         {
             await Console.Error.WriteLineAsync("Error: No versions were specified. Provide at least one version or use --delist-all-versions.");
             return -1;
         }
 
-        // Keep only strings that begin with a digit (typical semantic versions) and are non-empty
         Versions = Versions.Exclude(Versions, s => string.IsNullOrEmpty(s) || char.IsDigit(s.First()));
 
         if (Versions.Length == 0)
