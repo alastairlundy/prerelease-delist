@@ -11,8 +11,7 @@ A CLI to delist pre-release versions of your Nuget package(s).
 ## Installation
 
 ### Prerequisites
-
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- [.NET 10 Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)
 
 ### Build
 
