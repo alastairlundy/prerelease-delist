@@ -37,7 +37,7 @@ public class DelistCommand
         _packageDelistService = packageDelistService;
     }
     
-    [CliArgument(Name = "--package-id", Required = true,
+    [CliOption(Name = "--package-id", Required = true,
         Arity = CliArgumentArity.ExactlyOne)]
     public string PackageId { get; set; }
     
@@ -49,7 +49,7 @@ public class DelistCommand
     [DefaultValue(true)]
     public bool UseStrictParsing  { get; set; }
     
-    [CliArgument(Order = 0, Name = "<versions>")]
+    [CliArgument(Order = 0, Name = "versions")]
     public string[] Versions { get; set; }
     
     [CliOption(Name = "--api-key")]
@@ -63,12 +63,6 @@ public class DelistCommand
     public async Task<int> RunAsync(
         CancellationToken cancellationToken)
     {
-        if (Versions.Length == 0)
-        {
-            await Console.Error.WriteLineAsync("Error: No versions were specified. Provide at least one version or use --delist-all-versions.");
-            return -1;
-        }
-
         Versions = Versions.Exclude(Versions, s => string.IsNullOrEmpty(s) || char.IsDigit(s.First()));
 
         if (Versions.Length == 0)
