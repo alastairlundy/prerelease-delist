@@ -23,6 +23,9 @@ using NuGet.Protocol.Core.Types;
 
 namespace PreReleaseDelistLib;
 
+/// <summary>
+/// This class provides functionality to retrieve package versions from a NuGet repository.
+/// </summary>
 public class PackageVersionService : IPackageVersionService
 {
     public PackageVersionService()
@@ -35,16 +38,17 @@ public class PackageVersionService : IPackageVersionService
     }
 
     private readonly SourceCacheContext _cacheContext;
-    
+
     /// <summary>
-    /// 
+    /// Retrieves a list of prerelease package versions from a NuGet repository.
     /// </summary>
-    /// <param name="nugetApiUrl"></param>
-    /// <param name="nugetApiKey"></param>
-    /// <param name="packageId"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    public async Task<NuGetVersion[]> GetPrereleasePackageVersionsAsync(string nugetApiUrl, string nugetApiKey, string packageId,
+    /// <param name="nugetApiUrl">The URL of the NuGet API.</param>
+    /// <param name="nugetApiKey">The API key for authentication against the NuGet API.</param>
+    /// <param name="packageId">The identifier of the package to retrieve versions for.</param>
+    /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
+    /// <returns>An array of prerelease NuGet version strings matching the specified criteria.</returns>
+    public async Task<NuGetVersion[]> GetPrereleasePackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
+        string packageId,
         CancellationToken cancellationToken)
     {
         SourceRepository repoInfo = GetRepoInfo(nugetApiUrl);
@@ -63,19 +67,20 @@ public class PackageVersionService : IPackageVersionService
     }
 
     /// <summary>
-    /// 
+    /// Retrieves all available versions of a NuGet package from a specified repository.
     /// </summary>
-    /// <param name="nugetApiUrl"></param>
-    /// <param name="nugetApiKey"></param>
-    /// <param name="packageId"></param>
-    /// <param name="excludeUnlistedVersions"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    public async Task<NuGetVersion[]> GetAllPackageVersionsAsync(string nugetApiUrl, string nugetApiKey, string packageId, bool excludeUnlistedVersions,
+    /// <param name="nugetApiUrl">The URL of the NuGet API.</param>
+    /// <param name="nugetApiKey">The API key for authentication against the NuGet API.</param>
+    /// <param name="packageId">The identifier of the package to retrieve versions for.</param>
+    /// <param name="excludeUnlistedVersions">Indicates whether to exclude unlisted versions from the result.</param>
+    /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
+    /// <returns>An array of NuGet version strings matching the specified criteria.</returns>
+    public async Task<NuGetVersion[]> GetAllPackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
+        string packageId, bool excludeUnlistedVersions,
         CancellationToken cancellationToken)
     {
         SourceRepository repoInfo = GetRepoInfo(nugetApiUrl);
-        
+
         FindPackageByIdResource resource = await repoInfo.GetResourceAsync<FindPackageByIdResource>(cancellationToken);
         
         IEnumerable<NuGetVersion>? allPackageVersions =
@@ -91,18 +96,19 @@ public class PackageVersionService : IPackageVersionService
             return allPackageVersionsArray;
         
         IEnumerable<NuGetVersion> delistedVersions = await GetDelistedPackageVersionsAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken);
+        
         return allPackageVersionsArray.Exclude(delistedVersions).ToArray();
     }
 
     /// <summary>
-    /// 
+    /// Retrieves a list of delisted package versions from a NuGet repository for a specified package.
     /// </summary>
-    /// <param name="nugetApiUrl"></param>
-    /// <param name="nugetApiKey"></param>
-    /// <param name="packageId"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    public async Task<NuGetVersion[]> GetDelistedPackageVersionsAsync(string nugetApiUrl, string nugetApiKey, string packageId,
+    /// <param name="nugetApiUrl">The URL of the NuGet API.</param>
+    /// <param name="nugetApiKey">The API key for authentication against the NuGet API.</param>
+    /// <param name="packageId">The identifier of the package to retrieve versions for.</param>
+    /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
+    /// <returns>An array of delisted NuGet version strings matching the specified criteria.</returns>
+    public async Task<NuGetVersion[]> GetDelistedPackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
         CancellationToken cancellationToken)
     {
         SourceRepository repoInfo = GetRepoInfo(nugetApiUrl);

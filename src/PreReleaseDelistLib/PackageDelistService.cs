@@ -25,6 +25,9 @@ using NuGet.Protocol.Core.Types;
 
 namespace PreReleaseDelistLib;
 
+/// <summary>
+/// Service for requesting package delisting from a NuGet server.
+/// </summary>
 public class PackageDelistService : IPackageDelistService
 {
     private const string NugetApiKeyHeaderName = "X-NuGet-ApiKey";
@@ -39,13 +42,13 @@ public class PackageDelistService : IPackageDelistService
     }
 
     /// <summary>
-    /// 
+    /// Asynchronously requests the delisting of specified NuGet package versions from a package registry.
     /// </summary>
-    /// <param name="nugetApiUrl"></param>
-    /// <param name="nugetApiKey"></param>
-    /// <param name="packageId"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="nugetApiUrl">The URL of the NuGet API.</param>
+    /// <param name="nugetApiKey">The API key for authenticating with the NuGet service.</param>
+    /// <param name="packageId">The identifier of the NuGet package to delist versions for.</param>
+    /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
+    /// <returns>An array of tuples containing the NuGet version, a boolean indicating the success of the delisting operation, and a response message from the service.</returns>
     public async Task<(NuGetVersion version, bool delistSuccess, string responseMessage)[]> RequestPackageDelistAsync(
         string nugetApiUrl, string nugetApiKey, string packageId, CancellationToken cancellationToken)
     {
@@ -59,17 +62,18 @@ public class PackageDelistService : IPackageDelistService
     }
 
     /// <summary>
-    /// 
+    /// Asynchronously requests the delisting of specified NuGet package versions from a package registry.
     /// </summary>
-    /// <param name="nugetApiUrl"></param>
-    /// <param name="nugetApiKey"></param>
-    /// <param name="packageId"></param>
-    /// <param name="cancellationToken"></param>
-    /// <param name="versions"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentException"></exception>
-    public async IAsyncEnumerable<(NuGetVersion version, bool delistSuccess, string responseMessage)> RequestPackageDelistAsync(string nugetApiUrl,
-        string nugetApiKey, string packageId, [EnumeratorCancellation] CancellationToken cancellationToken, params NuGetVersion[] versions)
+    /// <param name="nugetApiUrl">The URL of the NuGet API.</param>
+    /// <param name="nugetApiKey">The API key for authenticating with the NuGet service.</param>
+    /// <param name="packageId">The identifier of the NuGet package to delist versions for.</param>
+    /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
+    /// <param name="versions">The versions of the package to delist.</param>
+    /// <returns>An array of tuples containing the NuGet version, a boolean indicating the success of the delisting operation, and a response message from the service.</returns>
+    public async IAsyncEnumerable<(NuGetVersion version, bool delistSuccess, string responseMessage)>
+        RequestPackageDelistAsync(string nugetApiUrl,
+            string nugetApiKey, string packageId, [EnumeratorCancellation] CancellationToken cancellationToken,
+            params NuGetVersion[] versions)
     {
         ArgumentException.ThrowIfNullOrEmpty(nugetApiUrl);
         ArgumentException.ThrowIfNullOrEmpty(packageId);
@@ -117,7 +121,8 @@ public class PackageDelistService : IPackageDelistService
             index++;
         }
         
-        await foreach (Task<(NuGetVersion version, HttpResponseMessage responseMessage)> response in Task.WhenEach(delistResponses).WithCancellation(cancellationToken))
+        await foreach (Task<(NuGetVersion version, HttpResponseMessage responseMessage)> response in Task.WhenEach(delistResponses)
+                           .WithCancellation(cancellationToken))
         {
             yield return (response.Result.version, response.Result.responseMessage.StatusCode == HttpStatusCode.Accepted,
                 response.Result.responseMessage.ReasonPhrase ?? string.Empty);
