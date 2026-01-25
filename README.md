@@ -21,35 +21,18 @@ dotnet build -c Release
 
 ## Usage
 
-### Authentication
-You can set your NuGet API Key and Server URL using the `auth` command:
-
-```bash
-prerelease-delist auth init --api-key "YOUR_API_KEY" --server-url "https://api.nuget.org/v3/index.json"
-```
-
-The Auth command saves the API Key and Server Url to Environment Variables. 
-
-**Security Info**: If you share a device with other people or other people have remote access to your device then do not use the CLI's auth commands. 
-
-To clear the stored authentication:
-
-```bash
-prerelease-delist auth clear
-```
-
 ### Delisting Packages
 
 To delist specific pre-release versions of a package:
 
 ```bash
-prerelease-delist "MyPackage" --versions "1.0.0-alpha.1" "1.0.0-alpha.2"
+prerelease-delist "MyPackage" --versions "1.0.0-alpha.1" "1.0.0-alpha.2" --api-key "myApiKey"
 ```
 
 To delist all pre-release versions of a package:
 
 ```bash
-prerelease-delist "MyPackage" --delist-all-versions true
+prerelease-delist "MyPackage" --delist-all-versions true --api-key "myApiKey"
 ```
 
 ## Rate Limits
