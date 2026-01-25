@@ -50,13 +50,13 @@ public class DelistCommand
     [CliArgument(Name = "versions")]
     public string[] Versions { get; set; }
     
-    [CliOption(Name = "--api-key")]
+    [CliOption(Name = "--api-key", Required = true)]
     [DefaultValue(null)]
     public string? ApiKey { get; set; }
     
     [CliOption(Name = "--server-url")]
-    [DefaultValue(null)]
-    public string? ServerUrl { get; set; }
+    [DefaultValue("https://api.nuget.org/")]
+    public string ServerUrl { get; set; }
     
     public async Task<int> RunAsync()
     {
@@ -70,17 +70,9 @@ public class DelistCommand
 
         ArgumentException.ThrowIfNullOrEmpty(PackageId);
         
-        string? nugetServerUrl = !string.IsNullOrEmpty(ServerUrl) ? ServerUrl : _configuration["NuGetServerUrl"];
         string? nugetApiKey = !string.IsNullOrEmpty(ApiKey) ? ApiKey : _configuration["NuGetApiKey"];
 
-        ArgumentException.ThrowIfNullOrEmpty(nugetServerUrl);
         ArgumentException.ThrowIfNullOrEmpty(nugetApiKey);
-        
-        if (string.IsNullOrEmpty(nugetServerUrl))
-        {
-            Console.WriteLine($"Error: {Resources.Exceptions_Configuration_NugetApiUrl}");
-            return -1;
-        }
 
         if (string.IsNullOrEmpty(nugetApiKey))
         {
@@ -92,14 +84,14 @@ public class DelistCommand
         
         if (DelistAllVersions)
         {
-            results = await _packageDelistService.RequestPackageDelistAsync(nugetServerUrl, nugetApiKey,
+            results = await _packageDelistService.RequestPackageDelistAsync(ServerUrl, nugetApiKey,
                 PackageId, CancellationToken.None);
         }
         else
         {
             NuGetVersion[] parsedVersions = ParseVersions(Versions, UseStrictParsing);
             
-            results = await _packageDelistService.RequestPackageDelistAsync(nugetServerUrl, nugetApiKey,
+            results = await _packageDelistService.RequestPackageDelistAsync(ServerUrl, nugetApiKey,
                     PackageId, CancellationToken.None,
                     parsedVersions)
                 .ToArrayAsync(CancellationToken.None);    
