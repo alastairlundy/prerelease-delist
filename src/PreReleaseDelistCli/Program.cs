@@ -34,14 +34,12 @@ Cli.Ext.ConfigureServices(services =>
         configurationBuilder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json")
-            .AddEnvironmentVariables("PreReleaseDelistCLI_")
             .AddCommandLine(args);
     }
     catch
     {
         configurationBuilder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddEnvironmentVariables("PreReleaseDelistCLI_")
             .AddCommandLine(args);
     }
         
