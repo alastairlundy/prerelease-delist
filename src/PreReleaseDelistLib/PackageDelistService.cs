@@ -110,11 +110,14 @@ public class PackageDelistService : IPackageDelistService
             { 
                 Task<HttpResponseMessage> response = client.DeleteAsync(
                     $"{packageId}{version.ToNormalizedString()}", cancellationToken);
-
+                
                 response.Wait(cancellationToken);
                 
                 return (version, response.Result);
             });
+
+            delistResponses[index].Start();
+            
             index++;
         }
         
@@ -162,21 +165,20 @@ public class PackageDelistService : IPackageDelistService
     {
         (SourceRepository repository, SourceCacheContext cacheContext) feedInfo = InitFeedInfo(nugetApiUrl);
 
-        PackageSearchResource searchResource =
-            await feedInfo.repository.GetResourceAsync<PackageSearchResource>(cancellationToken);
-
-        SearchFilter searchFilter = new(true, SearchFilterType.IsAbsoluteLatestVersion)
+        try
         {
-            PackageTypes = ["Dependency"]
-        };
+            FindPackageByIdResource? searchResource =
+                await feedInfo.repository.GetResourceAsync<FindPackageByIdResource>(cancellationToken);
+            
+            IEnumerable<NuGetVersion>? packageVersions = await searchResource.GetAllVersionsAsync(packageId,
+                feedInfo.cacheContext,
+                NullLogger.Instance, cancellationToken);
 
-        IEnumerable<IPackageSearchMetadata>? packages = await searchResource.SearchAsync(packageId, searchFilter, 0,
-            1000, NullLogger.Instance, cancellationToken);
-
-        if (packages is null)
+            return packageVersions is not null && packageVersions.Any();
+        }
+        catch(FatalProtocolException fatalProtocolException)
+        {
             return false;
-
-        return packages.Where(p => p.IsListed)
-            .Any(p => p.Identity.Id == packageId);
+        }
     }
 }
