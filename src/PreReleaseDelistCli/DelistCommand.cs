@@ -55,8 +55,8 @@ public class DelistCommand
     public string? ApiKey { get; set; }
 
     [CliOption(Name = "--server-url", Required = false)]
-    [DefaultValue("https://api.nuget.org/")]
-    public string ServerUrl { get; set; } = "https://api.nuget.org/";
+    [DefaultValue("https://api.nuget.org/v3/index.json")]
+    public string ServerUrl { get; set; } = "https://api.nuget.org/v3/index.json";
     
     public async Task<int> RunAsync()
     {
