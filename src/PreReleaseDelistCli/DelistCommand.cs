@@ -64,7 +64,7 @@ public class DelistCommand
 
         if (Versions.Length == 0)
         {
-            await Console.Error.WriteLineAsync("Error: No valid version strings provided after filtering.");
+            await Console.Error.WriteLineAsync(Resources.Errors_Input_NoVersionStrings);
             return -1;
         }
 
@@ -76,7 +76,7 @@ public class DelistCommand
 
         if (string.IsNullOrEmpty(nugetApiKey))
         {
-            Console.WriteLine($"Error: {Resources.Exceptions_Configuration_NugetApiKey}");
+            Console.WriteLine(Resources.Exceptions_Configuration_NugetApiKey);
             return -1;
         }
 
