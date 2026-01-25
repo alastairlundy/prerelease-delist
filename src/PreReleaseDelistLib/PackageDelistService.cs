@@ -176,7 +176,7 @@ public class PackageDelistService : IPackageDelistService
 
             return packageVersions is not null && packageVersions.Any();
         }
-        catch(FatalProtocolException fatalProtocolException)
+        catch(FatalProtocolException)
         {
             return false;
         }
