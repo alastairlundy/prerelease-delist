@@ -25,8 +25,11 @@ namespace PreReleaseDelistLib;
 /// </summary>
 public class PackageVersionService : IPackageVersionService
 {
-    public PackageVersionService()
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    public PackageVersionService(IHttpClientFactory httpClientFactory)
     {
+        _httpClientFactory = httpClientFactory;
         _cacheContext = new SourceCacheContext()
         {
             MaxAge = DateTimeOffset.Now + TimeSpan.FromMinutes(3),
@@ -109,27 +112,14 @@ public class PackageVersionService : IPackageVersionService
         string packageId,
         CancellationToken cancellationToken)
     {
-        SourceRepository repoInfo = GetRepoInfo(nugetApiUrl);
+        var client = _httpClientFactory.CreateClient();
         
-        PackageSearchResource searchResource =
-            await repoInfo.GetResourceAsync<PackageSearchResource>(cancellationToken);
+        client.DefaultRequestHeaders.Add("X-NuGet-ApiKey", nugetApiKey);
+        client.BaseAddress = new  Uri(nugetApiUrl.Replace("/index.json", string.Empty));
 
-        SearchFilter searchFilter = new(true, SearchFilterType.IsAbsoluteLatestVersion);
-
-        IEnumerable<IPackageSearchMetadata> packages = await searchResource.SearchAsync($"{packageId}", searchFilter, 0, 10000,
-            NullLogger.Instance, cancellationToken);
-
-        IPackageSearchMetadata? package = packages.FirstOrDefault(p => p.IsListed && p.Identity.Id == packageId);
-
-        if (package is null)
-            return [];
-
-        IEnumerable<VersionInfo> actualVersions = await package.GetVersionsAsync();
+        HttpResponseMessage response =  await client.GetAsync($"/RegistrationsBaseUrl/3.6.0/{packageId.ToLowerInvariant()}/index.json", cancellationToken);
         
-        return actualVersions
-            .Where(vInfo => !vInfo.PackageSearchMetadata.IsListed)
-            .Select(v => v.Version)
-            .ToArray();
+        
     }
 
     private SourceRepository GetRepoInfo(string nugetApiUrl) => Repository.Factory.GetCoreV3(nugetApiUrl);
