@@ -48,11 +48,6 @@ The tool searches for configuration in the following order:
 1. `appsettings.json`
 2. Environment variables prefixed with `PreReleaseDelistCLI_`
 
-### Environment Variables
-
-- `PreReleaseDelistCLI_NuGetServer:ApiKey`
-- `PreReleaseDelistCLI_NuGetServer:ApiBaseUrl`
-
 ## License
 
 The CLI project is licensed under the GNU GPL v3.0 or later – see the [LICENCE](LICENSE) file for details.
