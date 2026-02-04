@@ -31,14 +31,12 @@ Cli.Ext.ConfigureServices(services =>
     {
         configurationBuilder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json")
-            .AddCommandLine(args);
+            .AddJsonFile("appsettings.json");
     }
     catch
     {
         configurationBuilder = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddCommandLine(args);
+            .SetBasePath(Directory.GetCurrentDirectory());
     }
         
     IConfiguration configuration = configurationBuilder.Build();
@@ -50,5 +48,5 @@ await Cli.RunAsync<DelistCommand>(args, new CliSettings
 {
     EnableDefaultExceptionHandler = true,
     EnableSuggestDirective = true,
-    EnableEnvironmentVariablesDirective = true,
+    EnableEnvironmentVariablesDirective = true
 });
