@@ -19,7 +19,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using EnhancedLinq.Immediate;
+using EnhancedLinq.Immediate.Lists;
 using NuGet.Versioning;
 
 namespace PreReleaseDelistCli;
