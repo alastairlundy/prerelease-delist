@@ -17,6 +17,7 @@
  */
 
 using EnhancedLinq.Deferred;
+using PreReleaseDelistLib.Detectors;
 
 namespace PreReleaseDelistLib;
 
@@ -25,16 +26,11 @@ namespace PreReleaseDelistLib;
 /// </summary>
 public class PackageVersionService : IPackageVersionService
 {
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IPackageAvailabilityDetector _packageAvailabilityDetector;
 
-    public PackageVersionService(IHttpClientFactory httpClientFactory)
+    public PackageVersionService(IPackageAvailabilityDetector packageAvailabilityDetector)
     {
-        _httpClientFactory = httpClientFactory;
-        _cacheContext = new SourceCacheContext()
-        {
-            MaxAge = DateTimeOffset.Now + TimeSpan.FromMinutes(3),
-            NoCache = false,
-        };
+        _packageAvailabilityDetector = packageAvailabilityDetector;
     }
 
     private readonly SourceCacheContext _cacheContext;
@@ -81,6 +77,11 @@ public class PackageVersionService : IPackageVersionService
     {
         SourceRepository repoInfo = GetRepoInfo(nugetApiUrl);
 
+        bool packageExists = await _packageAvailabilityDetector.CheckPackageExistsAsync(nugetApiUrl, packageId, cancellationToken);
+
+        if (!packageExists)
+            throw new ArgumentException($"Package with Id of '{packageId}' does not exist.");
+        
         FindPackageByIdResource resource = await repoInfo.GetResourceAsync<FindPackageByIdResource>(cancellationToken);
         
         IEnumerable<NuGetVersion>? allPackageVersions =
@@ -112,13 +113,6 @@ public class PackageVersionService : IPackageVersionService
         string packageId,
         CancellationToken cancellationToken)
     {
-        var client = _httpClientFactory.CreateClient();
-        
-        client.DefaultRequestHeaders.Add("X-NuGet-ApiKey", nugetApiKey);
-        client.BaseAddress = new  Uri(nugetApiUrl.Replace("/index.json", string.Empty));
-
-        HttpResponseMessage response =  await client.GetAsync($"/RegistrationsBaseUrl/3.6.0/{packageId.ToLowerInvariant()}/index.json", cancellationToken);
-        
         
     }
 

@@ -18,7 +18,8 @@
 
 using System.Net;
 using System.Runtime.CompilerServices;
-using EnhancedLinq.Deferred;
+using PreReleaseDelistLib.Detectors;
+using PreReleaseDelistLib.Models;
 
 namespace PreReleaseDelistLib;
 
@@ -31,11 +32,14 @@ public class PackageDelistService : IPackageDelistService
     
     private readonly IHttpClientFactory _clientFactory;
     private readonly IPackageVersionService _packageVersionService;
+    private readonly IPackageAvailabilityDetector _packageAvailabilityDetector;
 
-    public PackageDelistService(IHttpClientFactory clientFactory, IPackageVersionService packageVersionService)
+    public PackageDelistService(IHttpClientFactory clientFactory, IPackageVersionService packageVersionService,
+        IPackageAvailabilityDetector packageAvailabilityDetector)
     {
         _clientFactory =  clientFactory;
         _packageVersionService = packageVersionService;
+        _packageAvailabilityDetector = packageAvailabilityDetector;
     }
 
     /// <summary>
@@ -76,20 +80,21 @@ public class PackageDelistService : IPackageDelistService
         ArgumentException.ThrowIfNullOrEmpty(packageId);
         ArgumentNullException.ThrowIfNull(versions);
         
-        bool doesPackageExists = await CheckIfPackageExists(nugetApiUrl, packageId, cancellationToken);
+        bool doesPackageExists = await _packageAvailabilityDetector.CheckPackageExistsAsync(nugetApiUrl, packageId, cancellationToken);
 
         if(!doesPackageExists)
             throw new ArgumentException($"Package '{packageId}' does not exist on Nuget Server '{nugetApiUrl}'.");
         
-        (NuGetVersion version, bool isListed)[] versionListResults = await CheckIfPackageIsListed(nugetApiUrl, nugetApiKey, packageId, versions, cancellationToken);
+        PackageVersionListingInfo[] versionListResults =  await _packageAvailabilityDetector.CheckIfPackageIsListedAsync(nugetApiUrl, 
+            nugetApiKey, packageId, versions, cancellationToken);
         
-        NuGetVersion[] versionsToDelist = versionListResults.Where(v => !v.isListed)
-            .Select(x => x.version)
+        NuGetVersion[] versionsToDelist = versionListResults.Where(v => !v.IsListed)
+            .Select(x => x.PackageVersion)
             .ToArray();
 
-        foreach ((NuGetVersion version, bool isListed) alreadyDelistedVersion in versionListResults.Where(v => !v.isListed))
+        foreach (PackageVersionListingInfo alreadyDelistedVersion in versionListResults.Where(v => !v.IsListed))
         {
-            yield return (alreadyDelistedVersion.version, false, "Package already de-listed.");
+            yield return (alreadyDelistedVersion.PackageVersion, false, "Package already de-listed.");
         }
 
         if (versionsToDelist.Length == 0)
@@ -126,59 +131,6 @@ public class PackageDelistService : IPackageDelistService
         {
             yield return (response.Result.version, response.Result.responseMessage.StatusCode == HttpStatusCode.Accepted,
                 response.Result.responseMessage.ReasonPhrase ?? string.Empty);
-        }
-    }
-
-    private async Task<(NuGetVersion version, bool isListed)[]> CheckIfPackageIsListed(string nugetApiUrl, string nugetApiKey, string packageId,
-        NuGetVersion[] versions, CancellationToken cancellationToken)
-    {
-        List<(NuGetVersion versions, bool isListed)> output = new(capacity: versions.Length);
-        
-        NuGetVersion[] alreadyDelistedVersions = await _packageVersionService.GetDelistedPackageVersionsAsync(nugetApiUrl, nugetApiKey,
-            packageId, cancellationToken);
-        
-        output.AddRange(alreadyDelistedVersions.Select(v => new ValueTuple<NuGetVersion, bool>(v, false)));
-        
-        IEnumerable<NuGetVersion> remainingVersions = versions.Exclude(alreadyDelistedVersions);
-        
-        foreach (NuGetVersion version in remainingVersions)
-        {
-            if (!output.Contains((version, true)))
-            {
-                output.Add((version, false));
-            }
-        }
-        
-        return output.ToArray();
-    }
-
-    private (SourceRepository repository, SourceCacheContext cacheContext) InitFeedInfo(string nugetApiUrl)
-    {
-        SourceRepository repository = Repository.Factory.GetCoreV3(nugetApiUrl);
-
-        SourceCacheContext cacheContext = new();
-        
-        return (repository, cacheContext);
-    }
-
-    private async Task<bool> CheckIfPackageExists(string nugetApiUrl, string packageId, CancellationToken cancellationToken)
-    {
-        (SourceRepository repository, SourceCacheContext cacheContext) feedInfo = InitFeedInfo(nugetApiUrl);
-
-        try
-        {
-            FindPackageByIdResource? searchResource =
-                await feedInfo.repository.GetResourceAsync<FindPackageByIdResource>(cancellationToken);
-            
-            IEnumerable<NuGetVersion>? packageVersions = await searchResource.GetAllVersionsAsync(packageId,
-                feedInfo.cacheContext,
-                NullLogger.Instance, cancellationToken);
-
-            return packageVersions is not null && packageVersions.Any();
-        }
-        catch(ArgumentException)
-        {
-            return false;
         }
     }
 }
