@@ -76,7 +76,7 @@ public class PackageVersionService : IPackageVersionService
     /// <param name="excludeUnlistedVersions">Indicates whether to exclude unlisted versions from the result.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
     /// <returns>An array of NuGet version strings matching the specified criteria.</returns>
-    public async Task<NuGetVersion[]> GetAllPackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
+    public async Task<PackageVersionListingInfo[]> GetAllPackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
         string packageId, bool excludeUnlistedVersions,
         CancellationToken cancellationToken)
     {
@@ -95,13 +95,20 @@ public class PackageVersionService : IPackageVersionService
         
         if (allPackageVersions is null)
             return [];
-        
-        NuGetVersion[] allPackageVersionsArray = allPackageVersions.ToArray();
+
+        PackageVersionListingInfo[] allPackageVersionsArray = allPackageVersions
+            .Select(v => new PackageVersionListingInfo
+            {
+                IsListed = true,
+                PackageVersion = v,
+                PackageVersionExists = true
+            })
+            .ToArray();
 
         if (!excludeUnlistedVersions)
             return allPackageVersionsArray;
         
-        IEnumerable<NuGetVersion> delistedVersions = await GetDelistedPackageVersionsAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken);
+        IEnumerable<PackageVersionListingInfo> delistedVersions = await GetDelistedPackageVersionsAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken);
         
         return allPackageVersionsArray.Exclude(delistedVersions).ToArray();
     }
@@ -114,7 +121,7 @@ public class PackageVersionService : IPackageVersionService
     /// <param name="packageId">The identifier of the package to retrieve versions for.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
     /// <returns>An array of delisted NuGet version strings matching the specified criteria.</returns>
-    public async Task<NuGetVersion[]> GetDelistedPackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
+    public async Task<PackageVersionListingInfo[]> GetDelistedPackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
         string packageId,
         CancellationToken cancellationToken)
     {

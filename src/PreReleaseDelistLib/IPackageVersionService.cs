@@ -43,7 +43,8 @@ public interface IPackageVersionService
     /// <param name="excludeUnlistedVersions">Indicates whether to exclude unlisted versions from the result. If false, all available versions are returned.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
     /// <returns>An array of NuGet version strings matching the specified criteria.</returns>
-    Task<NuGetVersion[]> GetAllPackageVersionsAsync(string nugetApiUrl, string nugetApiKey, string packageId,
+    Task<PackageVersionListingInfo[]> GetAllPackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
+        string packageId,
         bool excludeUnlistedVersions,
         CancellationToken cancellationToken);
 
@@ -55,6 +56,7 @@ public interface IPackageVersionService
     /// <param name="packageId">The identifier of the package to retrieve delisted versions for.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
     /// <returns>An array of delisted NuGet version strings matching the specified criteria.</returns>
-    Task<NuGetVersion[]> GetDelistedPackageVersionsAsync(string nugetApiUrl, string nugetApiKey, string packageId,
+    Task<PackageVersionListingInfo[]> GetDelistedPackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
+        string packageId,
         CancellationToken cancellationToken);
 }

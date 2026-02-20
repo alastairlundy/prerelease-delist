@@ -52,11 +52,11 @@ public class PackageDelistService : IPackageDelistService
     public async Task<(NuGetVersion version, bool delistSuccess, string responseMessage)[]> RequestPackageDelistAsync(
         string nugetApiUrl, string nugetApiKey, string packageId, CancellationToken cancellationToken)
     {
-        NuGetVersion[] versionToDelist = await _packageVersionService.GetAllPackageVersionsAsync
+        PackageVersionListingInfo[] versionToDelist = await _packageVersionService.GetAllPackageVersionsAsync
             (nugetApiUrl, nugetApiKey, packageId, true, cancellationToken);
         
-        IAsyncEnumerable<(NuGetVersion version, bool delistSuccess, string responseMessage)> delistResults = 
-            RequestPackageDelistAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken,  versionToDelist);
+        IAsyncEnumerable<(NuGetVersion version, bool delistSuccess, string responseMessage)> delistResults = RequestPackageDelistAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken, versionToDelist.Select(v => v.PackageVersion)
+            .ToArray());
 
         return await delistResults.ToArrayAsync(cancellationToken: cancellationToken);
     }
@@ -84,8 +84,8 @@ public class PackageDelistService : IPackageDelistService
         if(!doesPackageExists)
             throw new ArgumentException($"Package '{packageId}' does not exist on Nuget Server '{nugetApiUrl}'.");
         
-        PackageVersionListingInfo[] versionListResults =  await _packageAvailabilityDetector.CheckIfPackageIsListedAsync(nugetApiUrl, 
-            nugetApiKey, packageId, versions, cancellationToken);
+        PackageVersionListingInfo[] versionListResults =  await _packageVersionService.GetAllPackageVersionsAsync(nugetApiUrl, 
+            nugetApiKey, packageId, true, cancellationToken);
         
         NuGetVersion[] versionsToDelist = versionListResults.Where(v => !v.IsListed)
             .Select(x => x.PackageVersion)
