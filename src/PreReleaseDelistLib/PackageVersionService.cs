@@ -31,6 +31,11 @@ public class PackageVersionService : IPackageVersionService
     public PackageVersionService(IPackageAvailabilityDetector packageAvailabilityDetector)
     {
         _packageAvailabilityDetector = packageAvailabilityDetector;
+        _cacheContext = new SourceCacheContext()
+        {
+            DirectDownload = false,
+            MaxAge = DateTimeOffset.UtcNow.AddMinutes(10)
+        };
     }
 
     private readonly SourceCacheContext _cacheContext;
