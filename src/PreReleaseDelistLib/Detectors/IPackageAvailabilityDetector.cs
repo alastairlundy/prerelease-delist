@@ -1,6 +1,4 @@
-﻿using PreReleaseDelistLib.Models;
-
-namespace PreReleaseDelistLib.Detectors;
+﻿namespace PreReleaseDelistLib.Detectors;
 
 public interface IPackageAvailabilityDetector
 {

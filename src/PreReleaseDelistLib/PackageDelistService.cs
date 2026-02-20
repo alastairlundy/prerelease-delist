@@ -19,7 +19,6 @@
 using System.Net;
 using System.Runtime.CompilerServices;
 using PreReleaseDelistLib.Detectors;
-using PreReleaseDelistLib.Models;
 
 namespace PreReleaseDelistLib;
 
