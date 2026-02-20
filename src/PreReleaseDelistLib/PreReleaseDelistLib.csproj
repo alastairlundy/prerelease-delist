@@ -12,11 +12,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="EnhancedLinq" Version="1.0.0-alpha.6" />
-        <PackageReference Include="System.Linq.AsyncEnumerable" Version="10.0.2" 
-                          Condition="'$(TargetFramework)' == 'net9.0'"/>
-      <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.2" />
-      <PackageReference Include="NuGet.Protocol" Version="7.0.1" />
+        <PackageReference Include="EnhancedLinq" Version="1.0.0-beta.1" />
+      <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.3" />
+      <PackageReference Include="NuGet.Protocol" Version="7.3.0" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+      <PackageReference Include="System.Linq.AsyncEnumerable" Version="10.0.3" />
     </ItemGroup>
     
 </Project>
