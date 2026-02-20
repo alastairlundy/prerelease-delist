@@ -18,7 +18,6 @@
 
 using System.Net;
 using System.Runtime.CompilerServices;
-using PreReleaseDelistLib.Detectors;
 
 namespace PreReleaseDelistLib;
 
@@ -82,7 +81,7 @@ public class PackageDelistService : IPackageDelistService
         bool doesPackageExists = await _packageAvailabilityDetector.CheckPackageExistsAsync(nugetApiUrl, packageId, cancellationToken);
 
         if(!doesPackageExists)
-            throw new ArgumentException($"Package '{packageId}' does not exist on Nuget Server '{nugetApiUrl}'.");
+            throw new ArgumentException(string.Format(Resources.Exceptions_Package_NotFoundOnServer, packageId, nugetApiUrl));
         
         PackageVersionListingInfo[] versionListResults =  await _packageVersionService.GetAllPackageVersionsAsync(nugetApiUrl, 
             nugetApiKey, packageId, true, cancellationToken);
@@ -93,7 +92,8 @@ public class PackageDelistService : IPackageDelistService
 
         foreach (PackageVersionListingInfo alreadyDelistedVersion in versionListResults.Where(v => !v.IsListed))
         {
-            yield return (alreadyDelistedVersion.PackageVersion, false, "Package already de-listed.");
+            yield return (alreadyDelistedVersion.PackageVersion, false, 
+                Resources.Info_Package_AlreadyDelisted);
         }
 
         if (versionsToDelist.Length == 0)

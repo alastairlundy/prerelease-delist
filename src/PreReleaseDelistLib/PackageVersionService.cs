@@ -17,7 +17,6 @@
  */
 
 using EnhancedLinq.Deferred;
-using PreReleaseDelistLib.Detectors;
 
 namespace PreReleaseDelistLib;
 

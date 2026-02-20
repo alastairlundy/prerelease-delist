@@ -12,6 +12,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="CliInvoke.Core" Version="2.3.3" />
         <PackageReference Include="EnhancedLinq" Version="1.0.0-beta.1" />
       <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.3" />
       <PackageReference Include="NuGet.Protocol" Version="7.3.0" />
@@ -19,6 +20,21 @@
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
       <PackageReference Include="System.Linq.AsyncEnumerable" Version="10.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Internal\Localizations\Resources.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Internal\Localizations\Resources.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Resources.resx</DependentUpon>
+      </Compile>
     </ItemGroup>
     
 </Project>
