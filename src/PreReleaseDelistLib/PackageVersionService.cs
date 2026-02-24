@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using EnhancedLinq.Deferred;
+using EnhancedLinq.Deferred.Ranges;
 
 namespace PreReleaseDelistLib;
 
@@ -104,12 +104,15 @@ public class PackageVersionService : IPackageVersionService
             })
             .ToArray();
 
-        if (!excludeUnlistedVersions)
+        if (excludeUnlistedVersions)
             return allPackageVersionsArray;
         
         IEnumerable<PackageVersionListingInfo> delistedVersions = await GetDelistedPackageVersionsAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken);
         
-        return allPackageVersionsArray.Exclude(delistedVersions).ToArray();
+        return allPackageVersionsArray
+            .AppendRange(delistedVersions)
+            .Distinct()
+            .ToArray();
     }
 
     /// <summary>
@@ -128,4 +131,3 @@ public class PackageVersionService : IPackageVersionService
     }
 
     private SourceRepository GetRepoInfo(string nugetApiUrl) => Repository.Factory.GetCoreV3(nugetApiUrl);
-}
