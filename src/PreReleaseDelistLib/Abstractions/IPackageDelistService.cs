@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace PreReleaseDelistLib;
+namespace PreReleaseDelistLib.Abstractions;
 
 /// <summary>
 /// Interface for requesting package delisting from a NuGet Server.
