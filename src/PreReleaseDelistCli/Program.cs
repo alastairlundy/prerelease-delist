@@ -19,7 +19,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using PreReleaseDelistLib.Abstractions;
 
-
 Cli.Ext.ConfigureServices(services =>
 {
     services.AddHttpClient()
