@@ -24,8 +24,11 @@ Cli.Ext.ConfigureServices(services =>
 {
     services.AddHttpClient()
         .AddSingleton<IPackageVersionService, PackageVersionService>()
+#if UseNetSdkDelistBackend
+        .AddSingleton<IPackageDelistService, NetSdkPackageDelistService>();
+#else
         .AddSingleton<IPackageDelistService, PackageDelistService>();
-
+#endif
     
     IConfigurationBuilder configurationBuilder;
 
