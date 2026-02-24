@@ -30,7 +30,7 @@ public interface IPackageVersionService
     /// <param name="nugetApiKey">The API key for authentication against the NuGet API.</param>
     /// <param name="packageId">The identifier of the package to retrieve versions for.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
-    /// <returns>An array of prerelease NuGet version strings matching the specified criteria.</returns>
+    /// <returns>An asynchronous sequence of prerelease <see cref="NuGetVersion"/> objects matching the specified criteria.</returns>
     Task<NuGetVersion[]> GetPrereleasePackageVersionsAsync(string nugetApiUrl, string nugetApiKey, string packageId,
         CancellationToken cancellationToken);
 
@@ -42,7 +42,7 @@ public interface IPackageVersionService
     /// <param name="packageId">The identifier of the package to retrieve versions for.</param>
     /// <param name="excludeUnlistedVersions">Indicates whether to exclude unlisted versions from the result. If false, all available versions are returned.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
-    /// <returns>An array of NuGet version strings matching the specified criteria.</returns>
+    /// <returns>An array of <see cref="NuGetVersion"/> objects matching the specified criteria.</returns>
     Task<PackageVersionListingInfo[]> GetAllPackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
         string packageId,
         bool excludeUnlistedVersions,
@@ -55,7 +55,7 @@ public interface IPackageVersionService
     /// <param name="nugetApiKey">The API key for authentication against the NuGet API.</param>
     /// <param name="packageId">The identifier of the package to retrieve delisted versions for.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
-    /// <returns>An array of delisted NuGet version strings matching the specified criteria.</returns>
+    /// <returns>An array of delisted <see cref="NuGetVersion"/> objects matching the specified criteria.</returns>
     Task<PackageVersionListingInfo[]> GetDelistedPackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
         string packageId,
         CancellationToken cancellationToken);
