@@ -19,6 +19,11 @@
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
     </ItemGroup>
 
+    <PropertyGroup>
+        <!-- default true, CI can set to false for non tool deployment -->
+        <UseNetSdkDelistBackend Condition="'$(UseNetSdkDelistBackend)'==''">true</UseNetSdkDelistBackend>
+    </PropertyGroup>
+    
     <ItemGroup>
       <ProjectReference Include="..\PreReleaseDelistLib\PreReleaseDelistLib.csproj" />
     </ItemGroup>
