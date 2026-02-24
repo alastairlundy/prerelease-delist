@@ -17,6 +17,8 @@
  */
 
 using Microsoft.Extensions.DependencyInjection;
+using PreReleaseDelistLib.Abstractions;
+
 
 Cli.Ext.ConfigureServices(services =>
 {
@@ -24,6 +26,7 @@ Cli.Ext.ConfigureServices(services =>
         .AddSingleton<IPackageVersionService, PackageVersionService>()
         .AddSingleton<IPackageDelistService, PackageDelistService>();
 
+    
     IConfigurationBuilder configurationBuilder;
 
     // Fallback to avoid using AppSettings.Json if it is not present.

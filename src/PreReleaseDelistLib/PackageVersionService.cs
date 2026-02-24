@@ -26,6 +26,7 @@ namespace PreReleaseDelistLib;
 public class PackageVersionService : IPackageVersionService
 {
     private readonly IPackageAvailabilityDetector _packageAvailabilityDetector;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     public PackageVersionService(IPackageAvailabilityDetector packageAvailabilityDetector)
     {

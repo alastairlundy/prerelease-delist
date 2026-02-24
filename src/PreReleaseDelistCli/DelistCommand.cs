@@ -21,6 +21,7 @@ using System.ComponentModel;
 using System.Linq;
 using EnhancedLinq.Immediate.Lists;
 using NuGet.Versioning;
+using PreReleaseDelistLib.Abstractions;
 
 namespace PreReleaseDelistCli;
 
