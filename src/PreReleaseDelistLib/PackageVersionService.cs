@@ -183,21 +183,20 @@ public class PackageVersionService : IPackageVersionService
         if (allPackageVersions is null)
             return [];
 
-        PackageVersionListingInfo[] allPackageVersionsArray = allPackageVersions
+        IEnumerable<PackageVersionListingInfo> allPackageVersionsEnumerable = allPackageVersions
             .Select(v => new PackageVersionListingInfo
             {
                 IsListed = true,
                 PackageVersion = v,
                 PackageVersionExists = true
-            })
-            .ToArray();
+            });
 
         if (excludeUnlistedVersions)
-            return allPackageVersionsArray;
+            return allPackageVersionsEnumerable.ToArray();
         
         IEnumerable<PackageVersionListingInfo> delistedVersions = await GetDelistedPackageVersionsAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken);
         
-        return allPackageVersionsArray
+        return allPackageVersionsEnumerable
             .AppendRange(delistedVersions)
             .Distinct()
             .ToArray();
