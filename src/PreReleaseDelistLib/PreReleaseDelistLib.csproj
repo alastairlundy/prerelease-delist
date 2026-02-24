@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <LangVersion>14</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <TargetFrameworks>net10.0;net9.0</TargetFrameworks>
+        <TargetFrameworks>net10.0;net8.0;net9.0</TargetFrameworks>
         <PackageLicenseExpression>LGPL-3.0+</PackageLicenseExpression>
         <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
         <EnableAoTAnalyzer>true</EnableAoTAnalyzer>
@@ -16,10 +17,10 @@
         <PackageReference Include="EnhancedLinq" Version="1.0.0-beta.1" />
       <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.3" />
       <PackageReference Include="NuGet.Protocol" Version="7.3.0" />
-    </ItemGroup>
-
-    <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-      <PackageReference Include="System.Linq.AsyncEnumerable" Version="10.0.3" />
+        <PackageReference Include="Polyfill" Condition="'$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'netstandard2.0'" PrivateAssets="all"
+                          Version="9.11.0"/>
+        <PackageReference Include="System.Linq.AsyncEnumerable" Condition="'$(TargetFramework)' == 'net9.0' OR '$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'netstandard2.0'" 
+                          Version="10.0.3" />
     </ItemGroup>
 
     <ItemGroup>
