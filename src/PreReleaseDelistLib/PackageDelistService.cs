@@ -86,7 +86,7 @@ public class PackageDelistService : IPackageDelistService
         PackageVersionListingInfo[] versionListResults =  await _packageVersionService.GetAllPackageVersionsAsync(nugetApiUrl, 
             nugetApiKey, packageId, true, cancellationToken);
         
-        NuGetVersion[] versionsToDelist = versionListResults.Where(v => !v.IsListed)
+        NuGetVersion[] versionsToDelist = versionListResults.Where(v => v.IsListed)
             .Select(x => x.PackageVersion)
             .ToArray();
 
