@@ -90,7 +90,8 @@ public class PackageDelistService : IPackageDelistService
             .Select(x => x.PackageVersion)
             .ToArray();
 
-        foreach (PackageVersionListingInfo alreadyDelistedVersion in versionListResults.Where(v => !v.IsListed))
+        foreach (PackageVersionListingInfo alreadyDelistedVersion in versionListResults
+                     .Where(v => !v.IsListed))
         {
             yield return (alreadyDelistedVersion.PackageVersion, false, 
                 Resources.Info_Package_AlreadyDelisted);
