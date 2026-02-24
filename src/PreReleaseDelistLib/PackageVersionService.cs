@@ -127,6 +127,9 @@ public class PackageVersionService : IPackageVersionService
         string packageId,
         CancellationToken cancellationToken)
     {
+        ArgumentException.ThrowIfNullOrEmpty(packageId);
+        ArgumentException.ThrowIfNullOrEmpty(nugetApiUrl);
+        ArgumentException.ThrowIfNullOrEmpty(nugetApiKey);
         
     }
 
