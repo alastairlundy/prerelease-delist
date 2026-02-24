@@ -31,9 +31,35 @@ public interface IPackageVersionService
     /// <param name="packageId">The identifier of the package to retrieve versions for.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
     /// <returns>An asynchronous sequence of prerelease <see cref="NuGetVersion"/> objects matching the specified criteria.</returns>
+    IAsyncEnumerable<NuGetVersion> EnumeratePrereleasePackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
+        string packageId,
+        CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Retrieves a list of prerelease package versions from a NuGet repository.
+    /// </summary>
+    /// <param name="nugetApiUrl">The URL of the NuGet API.</param>
+    /// <param name="nugetApiKey">The API key for authentication against the NuGet API.</param>
+    /// <param name="packageId">The identifier of the package to retrieve versions for.</param>
+    /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
+    /// <returns>An array of prerelease <see cref="NuGetVersion"/> objects matching the specified criteria.</returns>
     Task<NuGetVersion[]> GetPrereleasePackageVersionsAsync(string nugetApiUrl, string nugetApiKey, string packageId,
         CancellationToken cancellationToken);
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="nugetApiUrl"></param>
+    /// <param name="nugetApiKey"></param>
+    /// <param name="packageId"></param>
+    /// <param name="excludeUnlistedVersions"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    IAsyncEnumerable<PackageVersionListingInfo> EnumerateAllPackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
+        string packageId,
+        bool excludeUnlistedVersions,
+        CancellationToken cancellationToken);
+    
     /// <summary>
     /// Retrieves all available versions of a NuGet package from the specified repository, optionally excluding unlisted versions.
     /// </summary>
@@ -48,6 +74,18 @@ public interface IPackageVersionService
         bool excludeUnlistedVersions,
         CancellationToken cancellationToken);
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="nugetApiUrl"></param>
+    /// <param name="nugetApiKey"></param>
+    /// <param name="packageId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    IAsyncEnumerable<PackageVersionListingInfo> EnumerateDelistedPackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
+        string packageId,
+        CancellationToken cancellationToken);
+    
     /// <summary>
     /// Retrieves a list of package versions that have been delisted from a NuGet repository.
     /// </summary>
