@@ -28,9 +28,10 @@ public class PackageVersionService : IPackageVersionService
     private readonly IPackageAvailabilityDetector _packageAvailabilityDetector;
     private readonly IHttpClientFactory _httpClientFactory;
 
-    public PackageVersionService(IPackageAvailabilityDetector packageAvailabilityDetector)
+    public PackageVersionService(IPackageAvailabilityDetector packageAvailabilityDetector, IHttpClientFactory httpClientFactory)
     {
         _packageAvailabilityDetector = packageAvailabilityDetector;
+        _httpClientFactory = httpClientFactory;
         _cacheContext = new SourceCacheContext()
         {
             DirectDownload = false,
@@ -132,6 +133,12 @@ public class PackageVersionService : IPackageVersionService
         ArgumentException.ThrowIfNullOrEmpty(nugetApiUrl);
         ArgumentException.ThrowIfNullOrEmpty(nugetApiKey);
         
+        HttpClient client = _httpClientFactory.CreateClient();
+
+        client.DefaultRequestHeaders.Add("X-NuGet-ApiKey", nugetApiKey);
+
+        
     }
 
     private SourceRepository GetRepoInfo(string nugetApiUrl) => Repository.Factory.GetCoreV3(nugetApiUrl);
+}
