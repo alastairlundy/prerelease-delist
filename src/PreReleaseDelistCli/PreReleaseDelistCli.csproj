@@ -24,10 +24,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="DotMake.CommandLine" />
-      <PackageReference Include="Microsoft.Extensions.Configuration" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+      <PackageReference Include="DotMake.CommandLine"/>
+      <PackageReference Include="Microsoft.Extensions.Configuration"/>
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json"/>
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection"/>
     </ItemGroup>
 
     <PropertyGroup>
