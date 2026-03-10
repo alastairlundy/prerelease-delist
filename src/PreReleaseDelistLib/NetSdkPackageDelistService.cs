@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using CliInvoke.Core;
 using CliInvoke.Core.Factories;
+using EnhancedLinq.Deferred;
 
 namespace PreReleaseDelistLib;
 
@@ -28,11 +29,12 @@ public class NetSdkPackageDelistService : IPackageDelistService
     public async Task<(NuGetVersion version, bool delistSuccess, string responseMessage)[]> RequestPackageDelistAsync(string nugetApiUrl, string nugetApiKey, 
         string packageId, CancellationToken cancellationToken)
     {
-        PackageVersionListingInfo[] versionToDelist = await _packageVersionService.GetAllPackageVersionsAsync
-            (nugetApiUrl, nugetApiKey, packageId, true, cancellationToken);
+        NuGetVersion[] versionToDelist = await _packageVersionService.GetAllPackageVersionsAsync
+            (nugetApiUrl, nugetApiKey, packageId, cancellationToken);
         
-        IAsyncEnumerable<(NuGetVersion version, bool delistSuccess, string responseMessage)> delistResults = RequestPackageDelistAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken, versionToDelist.Select(v => v.PackageVersion)
-            .ToArray());
+        IAsyncEnumerable<(NuGetVersion version, bool delistSuccess, string responseMessage)> delistResults =
+            RequestPackageDelistAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken, versionToDelist
+                .ToArray());
 
         return await delistResults.ToArrayAsync(cancellationToken: cancellationToken);
     }
@@ -49,24 +51,21 @@ public class NetSdkPackageDelistService : IPackageDelistService
         if(!doesPackageExists)
             throw new ArgumentException(string.Format(Resources.Exceptions_Package_NotFoundOnServer, packageId, nugetApiUrl));
         
-        PackageVersionListingInfo[] allVersions = await _packageVersionService.GetAllPackageVersionsAsync(nugetApiUrl, nugetApiKey, packageId, true, cancellationToken);
+        IDictionary<NuGetVersion, bool> checkVersionsForDelist = await _packageVersionService.CheckPackageVersionsListedAsync(nugetApiUrl, nugetApiKey, packageId,
+            true, versions, cancellationToken);
 
-        IEnumerable<NuGetVersion> alreadyDelistedVersions = allVersions.Where(v => !v.IsListed)
-            .Select(v => v.PackageVersion)
-            .Where(v => versions.Contains(v));
-
-        foreach (var version in alreadyDelistedVersions)
+        NuGetVersion[] alreadyDelistedVersions = checkVersionsForDelist.Where(kvp => !kvp.Value).Select(kvp => kvp.Key)
+            .ToArray();
+        
+        NuGetVersion[] versionsToDelist = versions.Exclude(alreadyDelistedVersions)
+            .ToArray();
+        
+        foreach (NuGetVersion version in alreadyDelistedVersions)
         {
             yield return new ValueTuple<NuGetVersion, bool, string>(version, false, Resources.Info_Package_AlreadyDelisted);
         }
-
-        IEnumerable<NuGetVersion> allPackageVersions = allVersions
-            .Where(v => v.IsListed)
-            .Select(v => v.PackageVersion);
         
-        IEnumerable<NuGetVersion> versionsToDeList = versions.Where(v => allPackageVersions.Contains(v));
-        
-        foreach (NuGetVersion version in versionsToDeList)
+        foreach (NuGetVersion version in versionsToDelist)
         {
             using ProcessConfiguration configuration = _processConfigurationFactory.Create(OperatingSystem.IsWindows()
                     ? "dotnet.exe" : "dotnet", 
