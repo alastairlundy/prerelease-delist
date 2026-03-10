@@ -17,7 +17,7 @@
  */
 
 using System.Runtime.CompilerServices;
-using EnhancedLinq.Deferred.Ranges;
+using EnhancedLinq.Deferred;
 
 namespace PreReleaseDelistLib;
 
@@ -27,12 +27,10 @@ namespace PreReleaseDelistLib;
 public class PackageVersionService : IPackageVersionService
 {
     private readonly IPackageAvailabilityDetector _packageAvailabilityDetector;
-    private readonly IHttpClientFactory _httpClientFactory;
 
-    public PackageVersionService(IPackageAvailabilityDetector packageAvailabilityDetector, IHttpClientFactory httpClientFactory)
+    public PackageVersionService(IPackageAvailabilityDetector packageAvailabilityDetector)
     {
         _packageAvailabilityDetector = packageAvailabilityDetector;
-        _httpClientFactory = httpClientFactory;
         _cacheContext = new SourceCacheContext()
         {
             DirectDownload = false,
@@ -106,12 +104,11 @@ public class PackageVersionService : IPackageVersionService
     /// <param name="nugetApiUrl"></param>
     /// <param name="nugetApiKey"></param>
     /// <param name="packageId"></param>
-    /// <param name="excludeUnlistedVersions"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
-    public async IAsyncEnumerable<PackageVersionListingInfo> EnumerateAllPackageVersionsAsync(string nugetApiUrl, string nugetApiKey, string packageId,
-        bool excludeUnlistedVersions, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public async IAsyncEnumerable<PackageVersionListingInfo> EnumerateAllPackageVersionsAsync(string nugetApiUrl, string nugetApiKey, string packageId, 
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         SourceRepository repoInfo = GetRepoInfo(nugetApiUrl);
 
@@ -142,16 +139,6 @@ public class PackageVersionService : IPackageVersionService
         {
             yield return versionListingInfo;
         }
-        
-        if(excludeUnlistedVersions)
-            yield break;
-        
-        IEnumerable<PackageVersionListingInfo> delistedVersions = await GetDelistedPackageVersionsAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken);
-        
-        foreach (PackageVersionListingInfo delistedVersion in delistedVersions)
-        {
-            yield return delistedVersion;
-        }
     }
 
     /// <summary>
@@ -160,12 +147,10 @@ public class PackageVersionService : IPackageVersionService
     /// <param name="nugetApiUrl">The URL of the NuGet API.</param>
     /// <param name="nugetApiKey">The API key for authentication against the NuGet API.</param>
     /// <param name="packageId">The identifier of the package to retrieve versions for.</param>
-    /// <param name="excludeUnlistedVersions">Indicates whether to exclude unlisted versions from the result.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
     /// <returns>An array of NuGet version strings matching the specified criteria.</returns>
-    public async Task<PackageVersionListingInfo[]> GetAllPackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
-        string packageId, bool excludeUnlistedVersions,
-        CancellationToken cancellationToken)
+    public async Task<NuGetVersion[]> GetAllPackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
+        string packageId, CancellationToken cancellationToken)
     {
         SourceRepository repoInfo = GetRepoInfo(nugetApiUrl);
 
@@ -183,60 +168,67 @@ public class PackageVersionService : IPackageVersionService
         if (allPackageVersions is null)
             return [];
 
-        IEnumerable<PackageVersionListingInfo> allPackageVersionsEnumerable = allPackageVersions
-            .Select(v => new PackageVersionListingInfo
+        return allPackageVersions.ToArray();
+    }
+
+    public async Task<bool> IsPackageVersionDelistedAsync(string nugetApiUrl, string nugetApiKey, string packageId,
+        bool includePreReleaseVersions, NuGetVersion packageVersion, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(packageId);
+        ArgumentException.ThrowIfNullOrEmpty(nugetApiUrl);
+        ArgumentException.ThrowIfNullOrEmpty(nugetApiKey);
+        
+        SourceRepository repoInfo = GetRepoInfo(nugetApiUrl);
+
+        PackageSearchResourceV3? searchResource =
+            await repoInfo.GetResourceAsync<PackageSearchResourceV3>(cancellationToken);
+        
+        IEnumerable<IPackageSearchMetadata> results = await searchResource.SearchAsync(packageId, 
+            new SearchFilter(includePreReleaseVersions), 0, 1000, NullLogger.Instance, cancellationToken);
+        
+        return !results.Any(r => r.Identity.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase)
+                                 && r.Identity.Version == packageVersion);
+    }
+
+    
+    public async Task<IDictionary<NuGetVersion, bool>> CheckPackageVersionsListedAsync(string nugetApiUrl,
+        string nugetApiKey, string packageId,
+        bool includePreReleaseVersions,
+        NuGetVersion[] packageVersions, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(packageId);
+        ArgumentException.ThrowIfNullOrEmpty(nugetApiUrl);
+        ArgumentException.ThrowIfNullOrEmpty(nugetApiKey);
+
+        SourceRepository repoInfo = GetRepoInfo(nugetApiUrl);
+
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(packageVersions.Length, 1000);
+        
+        PackageSearchResourceV3? searchResource =
+            await repoInfo.GetResourceAsync<PackageSearchResourceV3>(cancellationToken);
+        
+        IEnumerable<IPackageSearchMetadata> results = await searchResource.SearchAsync(packageId, 
+            new SearchFilter(includePreReleaseVersions), 0, 1000, NullLogger.Instance, cancellationToken);
+        
+        Dictionary<NuGetVersion, bool> output = new Dictionary<NuGetVersion, bool>(capacity: packageVersions.Length);
+
+        foreach (NuGetVersion version in packageVersions)
+        {
+            output.Add(version, false);
+        }
+        
+        NuGetVersion[] allPackageVersions = await GetAllPackageVersionsAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken);
+        
+        foreach (IPackageSearchMetadata result in results
+                     .Where(r => r.Identity.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase)))
+        {
+            if (packageVersions.Contains(result.Identity.Version) && allPackageVersions.Contains(result.Identity.Version))
             {
-                IsListed = true,
-                PackageVersion = v,
-                PackageVersionExists = true
-            });
-
-        if (excludeUnlistedVersions)
-            return allPackageVersionsEnumerable.ToArray();
-        
-        IEnumerable<PackageVersionListingInfo> delistedVersions = await GetDelistedPackageVersionsAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken);
-        
-        return allPackageVersionsEnumerable
-            .AppendRange(delistedVersions)
-            .Distinct()
-            .ToArray();
-    }
-
-    public IAsyncEnumerable<PackageVersionListingInfo> EnumerateDelistedPackageVersionsAsync(string nugetApiUrl, string nugetApiKey, string packageId,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(packageId);
-        ArgumentException.ThrowIfNullOrEmpty(nugetApiUrl);
-        ArgumentException.ThrowIfNullOrEmpty(nugetApiKey);
-        
-        HttpClient client = _httpClientFactory.CreateClient();
-
-        client.DefaultRequestHeaders.Add("X-NuGet-ApiKey", nugetApiKey);
-        
-        
-    }
-
-    /// <summary>
-    /// Retrieves a list of delisted package versions from a NuGet repository for a specified package.
-    /// </summary>
-    /// <param name="nugetApiUrl">The URL of the NuGet API.</param>
-    /// <param name="nugetApiKey">The API key for authentication against the NuGet API.</param>
-    /// <param name="packageId">The identifier of the package to retrieve versions for.</param>
-    /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
-    /// <returns>An array of delisted NuGet version strings matching the specified criteria.</returns>
-    public async Task<PackageVersionListingInfo[]> GetDelistedPackageVersionsAsync(string nugetApiUrl, string nugetApiKey,
-        string packageId,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(packageId);
-        ArgumentException.ThrowIfNullOrEmpty(nugetApiUrl);
-        ArgumentException.ThrowIfNullOrEmpty(nugetApiKey);
-        
-        HttpClient client = _httpClientFactory.CreateClient();
-
-        client.DefaultRequestHeaders.Add("X-NuGet-ApiKey", nugetApiKey);
-
-        
+                output[result.Identity.Version] = true;
+            }
+        }
+       
+        return output;
     }
 
     private SourceRepository GetRepoInfo(string nugetApiUrl) => Repository.Factory.GetCoreV3(nugetApiUrl);
