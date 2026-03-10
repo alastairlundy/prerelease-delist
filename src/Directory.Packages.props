@@ -1,0 +1,20 @@
+<Project>
+  <PropertyGroup>
+    <!-- Enable central package management, https://learn.microsoft.com/en-us/nuget/consume-packages/Central-Package-Management -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+      <PackageVersion Include="DotMake.CommandLine" Version="3.1.0" />
+      <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.3" />
+      <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.3" />
+      <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
+     <PackageVersion Include="CliInvoke.Core" Version="2.4.0" />
+        <PackageVersion Include="EnhancedLinq" Version="1.0.0-beta.2" />
+      <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.3" />
+      <PackageVersion Include="NuGet.Protocol" Version="7.3.0" />
+        <PackageVersion Include="Polyfill" PrivateAssets="all"
+                          Version="9.18.0"/>
+        <PackageVersion Include="System.Linq.AsyncEnumerable" Condition="'$(TargetFramework)' == 'net9.0' OR '$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'netstandard2.0'" 
+                          Version="10.0.3" />
+  </ItemGroup>
+</Project>

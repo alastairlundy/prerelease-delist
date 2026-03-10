@@ -13,14 +13,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CliInvoke.Core" Version="2.4.0" />
-        <PackageReference Include="EnhancedLinq" Version="1.0.0-beta.1" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.3" />
-      <PackageReference Include="NuGet.Protocol" Version="7.3.0" />
-        <PackageReference Include="Polyfill" Condition="'$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'netstandard2.0'" PrivateAssets="all"
-                          Version="9.11.0"/>
-        <PackageReference Include="System.Linq.AsyncEnumerable" Condition="'$(TargetFramework)' == 'net9.0' OR '$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'netstandard2.0'" 
-                          Version="10.0.3" />
+        <PackageReference Include="CliInvoke.Core"/>
+        <PackageReference Include="EnhancedLinq" />
+      <PackageReference Include="Microsoft.Extensions.Http" />
+      <PackageReference Include="NuGet.Protocol" />
+        <PackageReference Include="Polyfill" PrivateAssets="all"/>
+        <PackageReference Include="System.Linq.AsyncEnumerable" Condition="'$(TargetFramework)' == 'net9.0' OR '$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'netstandard2.0'"/>
     </ItemGroup>
 
     <ItemGroup>
