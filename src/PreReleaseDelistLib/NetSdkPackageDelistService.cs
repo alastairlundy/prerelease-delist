@@ -1,4 +1,3 @@
-﻿using System.Runtime.CompilerServices;
 using CliInvoke.Core;
 using CliInvoke.Core.Factories;
 using EnhancedLinq.Deferred;
@@ -26,21 +25,26 @@ public class NetSdkPackageDelistService : IPackageDelistService
         _processInvoker = processInvoker;
     }
     
-    public async Task<(NuGetVersion version, bool delistSuccess, string responseMessage)[]> RequestPackageDelistAsync(string nugetApiUrl, string nugetApiKey, 
-        string packageId, CancellationToken cancellationToken)
+    public async IAsyncEnumerable<(NuGetVersion version, bool delistSuccess, string responseMessage)>
+        RequestPackageDelistingAsync(string nugetApiUrl, string nugetApiKey,
+            string packageId, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         NuGetVersion[] versionToDelist = await _packageVersionService.GetAllPackageVersionsAsync
             (nugetApiUrl, nugetApiKey, packageId, cancellationToken);
         
         IAsyncEnumerable<(NuGetVersion version, bool delistSuccess, string responseMessage)> delistResults =
-            RequestPackageDelistAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken, versionToDelist
+            RequestPackageDelistingAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken, versionToDelist
                 .ToArray());
 
-        return await delistResults.ToArrayAsync(cancellationToken: cancellationToken);
+        await foreach ((NuGetVersion version, bool delistSuccess, string responseMessage) result in delistResults)
+        {
+            yield return (result.version, result.delistSuccess, result.responseMessage);
+        }
     }
 
-    public async IAsyncEnumerable<(NuGetVersion version, bool delistSuccess, string responseMessage)> RequestPackageDelistAsync(string nugetApiUrl, string nugetApiKey, string packageId,
-        [EnumeratorCancellation] CancellationToken cancellationToken, params NuGetVersion[] versions)
+    public async IAsyncEnumerable<(NuGetVersion version, bool delistSuccess, string responseMessage)>
+        RequestPackageDelistingAsync(string nugetApiUrl, string nugetApiKey, string packageId,
+            [EnumeratorCancellation] CancellationToken cancellationToken, params NuGetVersion[] versions)
     {
         ArgumentException.ThrowIfNullOrEmpty(nugetApiKey);
         ArgumentException.ThrowIfNullOrEmpty(packageId);

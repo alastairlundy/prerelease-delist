@@ -16,9 +16,6 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System.Runtime.CompilerServices;
-using EnhancedLinq.Deferred;
-
 namespace PreReleaseDelistLib;
 
 /// <summary>
@@ -107,7 +104,8 @@ public class PackageVersionService : IPackageVersionService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
-    public async IAsyncEnumerable<PackageVersionListingInfo> EnumerateAllPackageVersionsAsync(string nugetApiUrl, string nugetApiKey, string packageId, 
+    public async IAsyncEnumerable<PackageVersionListingInfo> EnumerateAllPackageVersionsAsync(string nugetApiUrl,
+        string nugetApiKey, string packageId,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         SourceRepository repoInfo = GetRepoInfo(nugetApiUrl);
