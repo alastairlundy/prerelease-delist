@@ -4,7 +4,7 @@
         <LangVersion>14</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <TargetFrameworks>net10.0;net8.0;net9.0;netstandard2.0</TargetFrameworks>
+        <TargetFrameworks>net10.0;net8.0;net9.0</TargetFrameworks>
         <PackageLicenseExpression>LGPL-3.0+</PackageLicenseExpression>
         <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
         <EnableAoTAnalyzer>true</EnableAoTAnalyzer>
@@ -19,7 +19,8 @@
       <PackageReference Include="Microsoft.Extensions.Http" />
       <PackageReference Include="NuGet.Protocol" />
         <PackageReference Include="Polyfill" PrivateAssets="all"/>
-        <PackageReference Include="System.Linq.AsyncEnumerable" Condition="'$(TargetFramework)' == 'net9.0' OR '$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'netstandard2.0'"/>
+        <PackageReference Include="System.Linq.AsyncEnumerable" 
+                          Condition="'$(TargetFramework)' == 'net9.0' OR '$(TargetFramework)' == 'net8.0'"/>
     </ItemGroup>
 
     <ItemGroup>
