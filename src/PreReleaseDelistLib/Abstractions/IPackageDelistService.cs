@@ -30,7 +30,7 @@ public interface IPackageDelistService
     /// <param name="nugetApiKey">The API key required for authentication with the NuGet service.</param>
     /// <param name="packageName">The name of the package from which pre-release versions are to be delisted.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to request cancellation of the operation.</param>
-    /// <returns>An array of tuples containing the version being processed, a boolean indicating whether
+    /// <returns>An asynchronous sequence of tuples containing the version being processed, a boolean indicating whether
     /// the delisting was successful, and a response message from the API.</returns>
     IAsyncEnumerable<(NuGetVersion version, bool delistSuccess, string responseMessage)> RequestPackageDelistingAsync(
         string nugetApiUrl, string nugetApiKey, string packageName, CancellationToken cancellationToken);
@@ -43,7 +43,7 @@ public interface IPackageDelistService
     /// <param name="packageName">The name of the package from which pre-release versions are to be delisted.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to request cancellation of the operation.</param>
     /// <param name="version">The versions of the package to delist.</param>
-    /// <returns>An array of tuples containing the version being processed, a boolean indicating whether
+    /// <returns>An asynchronous sequence of tuples containing the version being processed, a boolean indicating whether
     /// the delisting was successful, and a response message from the API.</returns>
     IAsyncEnumerable<(NuGetVersion version, bool delistSuccess, string responseMessage)> RequestPackageDelistingAsync(
         string nugetApiUrl, string nugetApiKey, string packageName, CancellationToken cancellationToken,
