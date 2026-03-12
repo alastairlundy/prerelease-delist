@@ -85,7 +85,7 @@ public class DelistCommand
         
         if (DelistAllVersions)
         {
-            results = await _packageDelistService.RequestPackageDelistAsync(ServerUrl, nugetApiKey,
+            results = _packageDelistService.RequestPackageDelistingAsync(ServerUrl, nugetApiKey,
                 PackageId, CancellationToken.None);
         }
         else
