@@ -41,7 +41,7 @@ public class PackageDelistService : IPackageDelistService
     }
 
     /// <summary>
-    /// Asynchronously requests the delisting of specified NuGet package versions from a package registry.
+    /// Asynchronously requests the delisting of all versions of a specified NuGet package from a package registry.
     /// </summary>
     /// <param name="nugetApiUrl">The URL of the NuGet API.</param>
     /// <param name="nugetApiKey">The API key for authenticating with the NuGet service.</param>

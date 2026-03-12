@@ -96,14 +96,13 @@ public class PackageVersionService : IPackageVersionService
     }
 
     /// <summary>
-    /// 
+    /// Enumerates all package versions from a NuGet repository.
     /// </summary>
-    /// <param name="nugetApiUrl"></param>
-    /// <param name="nugetApiKey"></param>
-    /// <param name="packageId"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentException"></exception>
+    /// <param name="nugetApiUrl">The URL of the NuGet API.</param>
+    /// <param name="nugetApiKey">The API key for authentication against the NuGet API.</param>
+    /// <param name="packageId">The identifier of the package to retrieve versions for.</param>
+    /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
+    /// <returns>An asynchronous sequence of all <see cref="NuGetVersion"/> objects matching the specified criteria.</returns>
     public async IAsyncEnumerable<PackageVersionListingInfo> EnumerateAllPackageVersionsAsync(string nugetApiUrl,
         string nugetApiKey, string packageId,
         [EnumeratorCancellation] CancellationToken cancellationToken)
@@ -169,6 +168,17 @@ public class PackageVersionService : IPackageVersionService
         return allPackageVersions.ToArray();
     }
 
+    /// <summary>
+    /// Determines whether a specific package version has been delisted from the NuGet repository.
+    /// </summary>
+    /// <remarks>This method does not perform a comprehensive check and can report false negatives.</remarks>
+    /// <param name="nugetApiUrl">The URL of the NuGet API.</param>
+    /// <param name="nugetApiKey">The API key for authentication against the NuGet API.</param>
+    /// <param name="packageId">The identifier of the package to check for delisting status.</param>
+    /// <param name="includePreReleaseVersions">Whether to include pre-release versions in the search results.</param>
+    /// <param name="packageVersion">The specific version of the package to verify against.</param>
+    /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
+    /// <returns>A boolean value indicating whether the specified package version is delisted. Returns true if delisted, false otherwise.</returns>
     public async Task<bool> IsPackageVersionDelistedAsync(string nugetApiUrl, string nugetApiKey, string packageId,
         bool includePreReleaseVersions, NuGetVersion packageVersion, CancellationToken cancellationToken)
     {
@@ -188,7 +198,16 @@ public class PackageVersionService : IPackageVersionService
                                  && r.Identity.Version == packageVersion);
     }
 
-    
+    /// <summary>
+    /// Checks if a specific list of packages is listed in the repository.
+    /// </summary>
+    /// <param name="nugetApiUrl">The URL of the NuGet API.</param>
+    /// <param name="nugetApiKey">The API key for authentication against the NuGet API.</param>
+    /// <param name="packageId">The identifier of the package to check if it is listed.</param>
+    /// <param name="includePreReleaseVersions">Whether to include pre-release versions in the search results.</param>
+    /// <param name="packageVersions">The specific versions of the package to verify against.</param>
+    /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
+    /// <returns>An asynchronous sequence indicating whether the specified package is listed in the repository.</returns>
     public async Task<IDictionary<NuGetVersion, bool>> CheckPackageVersionsListedAsync(string nugetApiUrl,
         string nugetApiKey, string packageId,
         bool includePreReleaseVersions,

@@ -24,7 +24,15 @@ public class NetSdkPackageDelistService : IPackageDelistService
         _processConfigurationFactory = processConfigurationFactory;
         _processInvoker = processInvoker;
     }
-    
+
+    /// <summary>
+    /// Asynchronously delists all versions of a NuGet package to be delisted based on the provided API credentials and package ID.
+    /// </summary>
+    /// <param name="nugetApiUrl">The URL of the NuGet API endpoint.</param>
+    /// <param name="nugetApiKey">The API key for authentication with the NuGet service.</param>
+    /// <param name="packageId">The identifier of the package(s) to be delisted.</param>
+    /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+    /// <returns>A sequence of tuples containing the version, whether the delisting was successful, and any response message from the API.</returns>
     public async IAsyncEnumerable<(NuGetVersion version, bool delistSuccess, string responseMessage)>
         RequestPackageDelistingAsync(string nugetApiUrl, string nugetApiKey,
             string packageId, [EnumeratorCancellation] CancellationToken cancellationToken)
@@ -42,6 +50,15 @@ public class NetSdkPackageDelistService : IPackageDelistService
         }
     }
 
+    /// <summary>
+    /// Asynchronously delists a list of versions of a NuGet package to be delisted based on the provided API credentials and package ID.
+    /// </summary>
+    /// <param name="nugetApiUrl">The URL of the NuGet API endpoint.</param>
+    /// <param name="nugetApiKey">The API key for authentication with the NuGet service.</param>
+    /// <param name="packageId">The identifier of the package(s) to be delisted.</param>
+    /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+    /// <param name="versions">The package versions to delist.</param>
+    /// <returns>A sequence of tuples containing the version, whether the delisting was successful, and any response message from the API.</returns>
     public async IAsyncEnumerable<(NuGetVersion version, bool delistSuccess, string responseMessage)>
         RequestPackageDelistingAsync(string nugetApiUrl, string nugetApiKey, string packageId,
             [EnumeratorCancellation] CancellationToken cancellationToken, params NuGetVersion[] versions)
