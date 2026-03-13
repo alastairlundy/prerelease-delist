@@ -15,6 +15,9 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#if UseNetSdkDelistBackend
+using CliInvoke.Extensions;
+#endif
 
 using Microsoft.Extensions.DependencyInjection;
 using PreReleaseDelistLib.Abstractions;
@@ -24,6 +27,7 @@ Cli.Ext.ConfigureServices(services =>
     services.AddHttpClient()
         .AddSingleton<IPackageVersionService, PackageVersionService>()
 #if UseNetSdkDelistBackend
+        .AddCliInvoke(ServiceLifetime.Singleton)
         .AddSingleton<IPackageDelistService, NetSdkPackageDelistService>();
 #else
         .AddSingleton<IPackageDelistService, PackageDelistService>();

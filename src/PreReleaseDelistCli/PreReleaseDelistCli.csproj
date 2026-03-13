@@ -18,12 +18,15 @@
         <PackageTags>delist</PackageTags>
         <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-        <TargetFrameworks>net10.0;net8.0;net9.0</TargetFrameworks>
         <PackageId>AlastairLundy.PreReleaseDelist</PackageId>
-        <Description>De-list NuGet package versions with ease from the CLI. </Description>
+        <Description>De-list NuGet package versions with ease from the Command Line.</Description>
+        <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
+        <TargetFramework>net10.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="CliInvoke" />
+      <PackageReference Include="CliInvoke.Extensions" />
       <PackageReference Include="DotMake.CommandLine"/>
       <PackageReference Include="Microsoft.Extensions.Configuration"/>
       <PackageReference Include="Microsoft.Extensions.Configuration.Json"/>
