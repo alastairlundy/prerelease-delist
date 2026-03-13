@@ -16,11 +16,15 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+
 using EnhancedLinq.Immediate.Lists;
+
 using NuGet.Versioning;
+using PreReleaseDelistCli.Helpers;
 using PreReleaseDelistLib.Abstractions;
 
 namespace PreReleaseDelistCli;
@@ -55,6 +59,10 @@ public class DelistCommand
     [DefaultValue(null)]
     public string? ApiKey { get; set; }
 
+    [CliOption(Name = "--non-interactive", Required = false)]
+    [DefaultValue(false)]
+    public bool NonInteractive { get; set; } = false;
+    
     [CliOption(Name = "--server-url", Required = false)]
     [DefaultValue("https://api.nuget.org/v3/index.json")]
     public string ServerUrl { get; set; } = "https://api.nuget.org/v3/index.json";
@@ -81,7 +89,7 @@ public class DelistCommand
             return -1;
         }
 
-        (NuGetVersion version, bool isDelisted, string responseMessage)[] results; 
+        IAsyncEnumerable<(NuGetVersion version, bool isDelisted, string responseMessage)> results; 
         
         if (DelistAllVersions)
         {
@@ -90,42 +98,64 @@ public class DelistCommand
         }
         else
         {
-            NuGetVersion[] parsedVersions = ParseVersions(Versions, UseStrictParsing);
+            NuGetVersion[] parsedVersions = [];
             
-            results = await _packageDelistService.RequestPackageDelistAsync(ServerUrl, nugetApiKey,
-                    PackageId, CancellationToken.None,
-                    parsedVersions)
-                .ToArrayAsync(CancellationToken.None);    
+          ///
+                               parsedVersions = ParseVersions(Versions, UseStrictParsing);
+
+            
+            results = _packageDelistService.RequestPackageDelistingAsync(ServerUrl, nugetApiKey,
+                PackageId, CancellationToken.None,
+                parsedVersions);
         }
-
-        await Console.Out.WriteLineAsync($"Versions Delisted for Package: {PackageId}");
-
-        IEnumerable<(NuGetVersion version, bool isDelisted, string responseMessage)> delistedVersions = results
-            .Where(x => x.isDelisted);
 
         int delistedVersionsCount = 0;
-        foreach ((NuGetVersion version, bool isDelisted, string responseMessage) result in delistedVersions)
+        
+        if (NonInteractive)
         {
-            await Console.Out.WriteLineAsync($"{result.version.ToFullString()}");
-            delistedVersionsCount++;
+            await foreach ((NuGetVersion version, bool isDelisted, string responseMessage) result in results)
+            {
+                string statusText = result.isDelisted ? "Success" : "Failure";
+
+                string resultText = $"Version={result.version.ToNormalizedString()} Status={statusText}";
+
+                if (!result.isDelisted)
+                {
+                    resultText += $"Error='{result.responseMessage}'";
+                }
+                else
+                {
+                    delistedVersionsCount++;
+                }
+
+                await Console.Out.WriteLineAsync(resultText);
+            }
+
+            return delistedVersionsCount != Versions.Length ? 1 : 0;
         }
 
-        await Console.Out.WriteLineAsync();
+        ConcurrentBag<NuGetVersion> delistedVersions = new();
+        ConcurrentBag<(NuGetVersion version, bool isDelisted, string responseMessage)> nonDelistedVersions = new();
 
         int exitCode = 0;
         
-        if (delistedVersionsCount < results.Length)
+        await foreach ((NuGetVersion version, bool isDelisted, string responseMessage) result in results)
         {
-            await Console.Out.WriteLineAsync($"The following versions of {PackageId} could not be delisted:");
-
-            foreach ((NuGetVersion version, bool isDelisted, string responseMessage) result in 
-                     results.Where(x => !x.isDelisted))
+            if (result.isDelisted)
             {
-                await Console.Out.WriteLineAsync($"{result.version.ToFullString()} - With Reason: {result.responseMessage}");
+                delistedVersions.Add(result.version);
             }
-
-            exitCode = 1;
+            else
+            {
+                nonDelistedVersions.Add(result);
+            }
         }
+
+        if (delistedVersions.Count > 0)
+            await ResultHelper.PrintDelistedVersions(delistedVersions.ToArray(), PackageId);
+        
+        if(nonDelistedVersions.Count > 0)
+            exitCode = await ResultHelper.PrintNonDelistedVersions(nonDelistedVersions.ToArray(), PackageId);
         
         return exitCode;
     }
