@@ -13,6 +13,7 @@
     <PackageVersion Include="CliInvoke.Core" Version="2.4.1" />
     <PackageVersion Include="EnhancedLinq" Version="1.0.0-beta.3" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.5" />
+    <PackageVersion Include="NuGet.Packaging" Version="7.3.1" />
     <PackageVersion Include="NuGet.Protocol" Version="7.3.0" />
     <PackageVersion Include="Polyfill" PrivateAssets="all" Version="9.18.0" />
     <PackageVersion Include="System.Linq.AsyncEnumerable" Version="10.0.4" />
