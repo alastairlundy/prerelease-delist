@@ -4,12 +4,12 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="CliInvoke" Version="2.4.1" />
-    <PackageVersion Include="CliInvoke.Extensions" Version="2.4.1" />
-    <PackageVersion Include="DotMake.CommandLine" Version="3.1.0" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
+    <PackageVersion Include="CliInvoke" Version="2.5.3" />
+    <PackageVersion Include="CliInvoke.Extensions" Version="2.5.3" />
+    <PackageVersion Include="DotMake.CommandLine" Version="3.2.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.6" />
     <PackageVersion Include="CliInvoke.Core" Version="2.4.1" />
     <PackageVersion Include="EnhancedLinq" Version="1.0.0-beta.3" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.5" />
