@@ -93,6 +93,6 @@ public interface IPackageVersionService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task<IDictionary<NuGetVersion, bool>> CheckPackageVersionsListedAsync(string nugetApiUrl, string nugetApiKey,
-        string packageId, bool includePreReleaseVersions, NuGetVersion[] packageVersions,
+        string packageId, bool includePreReleaseVersions, IList<NuGetVersion> packageVersions,
         CancellationToken cancellationToken);
 }

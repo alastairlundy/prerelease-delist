@@ -20,7 +20,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-
 using EnhancedLinq.Immediate.Lists;
 
 using NuGet.Versioning;
@@ -98,15 +97,11 @@ public class DelistCommand
         }
         else
         {
-            NuGetVersion[] parsedVersions = [];
-            
-          ///
-                               parsedVersions = ParseVersions(Versions, UseStrictParsing);
+            IList<NuGetVersion> parsedVersions = ParseVersions(Versions, UseStrictParsing);
 
             
             results = _packageDelistService.RequestPackageDelistingAsync(ServerUrl, nugetApiKey,
-                PackageId, CancellationToken.None,
-                parsedVersions);
+                PackageId, parsedVersions, CancellationToken.None);
         }
 
         int delistedVersionsCount = 0;
@@ -160,7 +155,7 @@ public class DelistCommand
         return exitCode;
     }
     
-    private NuGetVersion[] ParseVersions(string[] versions, bool throwOnError)
+    private static IList<NuGetVersion> ParseVersions(string[] versions, bool throwOnError)
     {
         List<NuGetVersion> output = new(capacity: versions.Length);
 
@@ -178,7 +173,7 @@ public class DelistCommand
                     throw new ArgumentException("Invalid version string: " + versionString);
             }
         }
-        
-        return output.ToArray();
+
+        return output;
     }
 }

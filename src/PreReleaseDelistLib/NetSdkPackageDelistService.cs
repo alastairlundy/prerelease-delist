@@ -59,8 +59,7 @@ public class NetSdkPackageDelistService : IPackageDelistService
             (nugetApiUrl, nugetApiKey, packageId, cancellationToken);
         
         IAsyncEnumerable<(NuGetVersion version, bool delistSuccess, string responseMessage)> delistResults =
-            RequestPackageDelistingAsync(nugetApiUrl, nugetApiKey, packageId, cancellationToken, versionToDelist
-                .ToArray());
+            RequestPackageDelistingAsync(nugetApiUrl, nugetApiKey, packageId, versionToDelist, cancellationToken);
 
         await foreach ((NuGetVersion version, bool delistSuccess, string responseMessage) result in delistResults)
         {
@@ -78,8 +77,8 @@ public class NetSdkPackageDelistService : IPackageDelistService
     /// <param name="versions">The package versions to delist.</param>
     /// <returns>A sequence of tuples containing the version, whether the delisting was successful, and any response message from the API.</returns>
     public async IAsyncEnumerable<(NuGetVersion version, bool delistSuccess, string responseMessage)>
-        RequestPackageDelistingAsync(string nugetApiUrl, string nugetApiKey, string packageId,
-            [EnumeratorCancellation] CancellationToken cancellationToken, params NuGetVersion[] versions)
+        RequestPackageDelistingAsync(string nugetApiUrl, string nugetApiKey, string packageId, IList<NuGetVersion> versions,
+            [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(nugetApiKey);
         ArgumentException.ThrowIfNullOrEmpty(packageId);
