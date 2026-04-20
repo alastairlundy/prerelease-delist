@@ -211,7 +211,7 @@ public class PackageVersionService : IPackageVersionService
     public async Task<IDictionary<NuGetVersion, bool>> CheckPackageVersionsListedAsync(string nugetApiUrl,
         string nugetApiKey, string packageId,
         bool includePreReleaseVersions,
-        NuGetVersion[] packageVersions, CancellationToken cancellationToken)
+        IList<NuGetVersion> packageVersions, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(packageId);
         ArgumentException.ThrowIfNullOrEmpty(nugetApiUrl);
@@ -219,7 +219,7 @@ public class PackageVersionService : IPackageVersionService
 
         SourceRepository repoInfo = GetRepoInfo(nugetApiUrl);
 
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(packageVersions.Length, 1000);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(packageVersions.Count, 1000);
         
         PackageSearchResourceV3? searchResource =
             await repoInfo.GetResourceAsync<PackageSearchResourceV3>(cancellationToken);
@@ -227,7 +227,7 @@ public class PackageVersionService : IPackageVersionService
         IEnumerable<IPackageSearchMetadata> results = await searchResource.SearchAsync(packageId, 
             new SearchFilter(includePreReleaseVersions), 0, 1000, NullLogger.Instance, cancellationToken);
         
-        Dictionary<NuGetVersion, bool> output = new Dictionary<NuGetVersion, bool>(capacity: packageVersions.Length);
+        Dictionary<NuGetVersion, bool> output = new Dictionary<NuGetVersion, bool>(capacity: packageVersions.Count);
 
         foreach (NuGetVersion version in packageVersions)
         {
