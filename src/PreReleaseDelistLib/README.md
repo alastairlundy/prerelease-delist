@@ -2,7 +2,7 @@
 
 `PreReleaseDelistLib` is a .NET library designed to help manage and delist prerelease versions of NuGet packages from a NuGet repository.
 
-It supports .NET 9 and newer.
+It supports .NET 10 and newer.
 
 ## Features
 
@@ -13,13 +13,6 @@ It supports .NET 9 and newer.
 ## Installation
 
 To use `PreReleaseDelistLib` in your project, you can add it as a project reference or include the source files.
-
-### Dependencies
-
-The library depends on the following NuGet packages:
-- `EnhancedLinq` (>= 1.0.0-alpha.5)
-- `Microsoft.Extensions.Http` (>= 10.0.2)
-- `NuGet.Protocol` (>= 7.0.1)
 
 ## Usage
 
